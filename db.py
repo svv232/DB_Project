@@ -18,7 +18,9 @@ def login_user(email, password):
     cursor.execute(query, (email, password))
     data = cursor.fetchone()
     cursor.close()
-    return not data
+    res = data
+    message = "Logged In!!" if res else "Not Logged In ):"
+    return res
 
 
 def register_user(email, password, fname, lname):
@@ -28,7 +30,7 @@ def register_user(email, password, fname, lname):
     data = cursor.fetchone()
 
     if data:
-        return False
+        return False, "User could not be registered"
 
     insert = 'INSERT INTO Person VALUES(%s, %s, %s, %s)'
     password = sha256(password).hexdigest()
@@ -36,7 +38,7 @@ def register_user(email, password, fname, lname):
     conn.commit()
     cursor.close()
 
-    return True
+    return True, "User was successfully registered!"
 
 
 def get_public_content():
@@ -51,29 +53,52 @@ def get_public_content():
     return posts
 
 
-def get_my_content():
-    pass
-
-
-def get_pending_tag():
-    pass
-
-
-def post_content(email, content):
+def get_my_content(friend_group):
     cursor = conn.cursor()
-    query = 'INSERT INTO blog (blog_post, username) VALUES(%s, %s)'
+    query = (f'')
+    cursor.execute(query)
+    content = cursor.fetchall()
+    cursor.close()
+    return content, "Successfully Got Content!"
+
+
+def get_pending_tag(user, action):
+    cursor = conn.cursor()
+    message = f"{action} for tag was successfully done!!"
+    if action == "accept":
+        status, query = (""), 
+    elif action == "decline":
+        status, query = (""), 
+    elif action == "remove":
+        status, query = ("")
+    else:
+        message = "An action was not decided"
+        status, query = ("")
+    
+    cursor.execute(query)
+    tag = cursor.fetchall()
+    cursor.close()
+    return status, tag
+
+def post_content(email, item_id, 
+        email_post, post_time, file_path, 
+        item_name, is_pub ):
+    cursor = conn.cursor()
+    query = f'INSERT INTO ContentItem ({item_id},
+    {email_post}, {post_time}, {file_path}, 
+    {item_name}, {is_pub}) VALUES(%s, %s, %s, %s, %s, %s);'
     cursor.execute(query, (email, content))
     conn.commit()
     cursor.close()
 
-    return True
+    return "Item Sucessfully Posted", True
 
 
 def tag_content(content, tagged):
     pass
 
 
-def add_friend(friend):
+def add_friend(user, friend):
     pass
 
 
