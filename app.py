@@ -9,10 +9,11 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    if 'email' not in session:
-        return render_template('index.html')
-
     _, posts = get_public_content()
+
+    if 'email' not in session:
+        return render_template('index.html', posts=posts)
+
     return render_template('index.html', email=session['email'],
                            fname=session['fname'], lname=session['lname'],
                            posts=posts)
@@ -72,7 +73,8 @@ def logout():
 @login_required
 def post():
     email = session['email']
-    post_content(email, 'test', 'file_contents_i_guess', True)
+    post = request.form.get('submission-text')
+    post_content(email, 'test', post, True)
     return redirect('/')
 
 

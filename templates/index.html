@@ -13,8 +13,12 @@
       <li class="nav-item dropdown ml-auto">
         <a id="profile" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="far fa-user-circle"></i></a>
         <div class="dropdown-menu" aria-labelledby="profile">
-          <a class="dropdown-item" href="/login">Login</a>
-					<a class="dropdown-item" href="/register">Register</a>
+					{% if not email %}
+	          <a class="dropdown-item" href="/login">Login</a>
+						<a class="dropdown-item" href="/register">Register</a>
+					{% else %}
+						<a class="dropdown-item" href="/logout">Logout</a>
+					{% endif %}
         </div>
       </li>
       <li class="nav-item">
