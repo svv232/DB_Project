@@ -39,26 +39,42 @@ def register_user(email, password, fname, lname):
     return True
 
 
-def get_public(username):
+def get_public_content():
     cursor = conn.cursor()
     query = ('SELECT item_id, email_post, post_time, file_path, item_name' +
              'FROM ContentItem WHERE is_pub = TRUE AND post_time >= now() + ' +
-             'INTERVAL 1 DAY ')
+             'INTERVAL 1 DAY')
     cursor.execute(query)
     posts = cursor.fetchall()
     cursor.close()
 
     return posts
 
-#
-# def create_post(username, blog):
-#     cursor = conn.cursor()
-#     query = 'INSERT INTO blog (blog_post, username) VALUES(%s, %s)'
-#     cursor.execute(query, (blog, username))
-#     conn.commit()
-#     cursor.close()
-#
-#     return True
+
+def get_my_content():
+    pass
+
+
+def get_pending_tag():
+    pass
+
+
+def post_content(email, content):
+    cursor = conn.cursor()
+    query = 'INSERT INTO blog (blog_post, username) VALUES(%s, %s)'
+    cursor.execute(query, (email, content))
+    conn.commit()
+    cursor.close()
+
+    return True
+
+
+def tag_content(content, tagged):
+    pass
+
+
+def add_friend(friend):
+    pass
 
 
 # def get_users(email):
