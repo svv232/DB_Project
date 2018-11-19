@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, session, url_for, redirect
-from db import login_user, register_user
+from db import login_user, register_user, get_public_content
 
 import os
 
@@ -8,12 +8,13 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    if not session['email']:
+    if 'email' not in session:
         return render_template('index.html')
 
-    email = session['email']
-    # posts = get_posts(email)
-    return render_template('home.html', email=email)
+    posts = get_public_content()
+    return render_template('index.html', email=session['email'],
+                           fname=session['fname'], lname=session['lname'],
+                           posts=posts)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -24,11 +25,15 @@ def login():
     email = request.form['email']
     password = request.form['password']
 
-    if not login_user(email, password):
+    user = login_user(email, password)
+
+    if not user:
         error = 'Invalid email or password'
         return render_template('login.html', error=error)
 
     session['email'] = email
+    session['fname'] = user['fname']
+    session['lname'] = user['lname']
     return redirect('/')
 
 
@@ -52,6 +57,8 @@ def register():
         return render_template('register.html', error=error)
 
     session['email'] = email
+    session['fname'] = fname
+    session['lname'] = lname
     return redirect('/')
 
 
@@ -59,6 +66,12 @@ def register():
 def logout():
     session.pop('email')
     return redirect('/')
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
 
 #
 # @app.route('/bloggers')

@@ -13,12 +13,12 @@ conn = pymysql.connect(host='localhost',
 def login_user(email, password):
     cursor = conn.cursor()
     query = 'SELECT * FROM person WHERE email = %s and password = %s'
-    password = sha256(password).hexdigest()
+    password = sha256(password.encode('utf-8')).hexdigest()
 
     cursor.execute(query, (email, password))
     data = cursor.fetchone()
     cursor.close()
-    return not data
+    return data
 
 
 def register_user(email, password, fname, lname):
@@ -31,7 +31,7 @@ def register_user(email, password, fname, lname):
         return False
 
     insert = 'INSERT INTO Person VALUES(%s, %s, %s, %s)'
-    password = sha256(password).hexdigest()
+    password = sha256(password.encode('utf-8')).hexdigest()
     cursor.execute(insert, (email, password, fname, lname))
     conn.commit()
     cursor.close()
