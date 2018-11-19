@@ -27,7 +27,6 @@
   <div class="row">
     <div class="col-sm-3">
       <div class="neko-card">
-				{{ email }}
 				{% if email %}
 					<div id="profile-card">
 						<div id="bg-picture"></div>
@@ -64,9 +63,9 @@
               </div>
             </div>
           </div>
-          <button type="button" id="submission-link" class="btn submission-link"><i class="fas fa-link"></i></button>
-          <form id="submit-form" action="newpost" method="post">
-            <button id="submit" type="button" class="meow btn submission-button">Meow</button>
+          <!-- <button type="button" id="submission-link" class="btn submission-link"><i class="fas fa-link"></i></button> -->
+          <form id="submit-form" action="post" method="POST">
+            <button type="submit" type="button" class="meow btn submission-button">Meow</button>
           </form>
         </div>
         <ul id="post-container">
@@ -77,12 +76,12 @@
                 <button class="btn btn-secondary dropdown-toggle report-button" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   <i class="fas fa-angle-down"></i>
                 </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <!-- <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                   <h8 class="dropdown-header report-header">Report</h8>
                   <a class="dropdown-item" href="report?id={{ post.id }}&instance={{ post.instance }}">Inappropriate Content</a>
                   <a class="dropdown-item" href="report?id={{ post.id }}&instance={{ post.instance }}">Offensive Language</a>
                   <a class="dropdown-item" href="report?id={{ post.id }}&instance={{ post.instance }}">Broken Link</a>
-                </div>
+                </div> -->
               </div>
               <div class="row">
                 <div class="col-sm-1">
@@ -90,10 +89,10 @@
                 </div>
                 <div class="col-sm-11">
                   <div class="post-info">
-                    <span class="post-user">{{ post.posted_name }}</span> <span class="post-tag">@{{ post.posted_by }}</span>
+                    <span class="post-user">{{ post['item_name'] }}</span> <span class="post-tag">@{{ post['email_post'] }}</span>
                   </div>
                   <div class="post-content">
-                    {{ post.content }}
+                    {{ post['file_path'] }}
                     {% if post.link %}
                       <a class="post-quote" href="{{ post.link }}">
                         <div class="post-quote-info">
@@ -116,7 +115,7 @@
       </div>
     </div>
     <div class="col-sm-3">
-			{% if email %}
+			{% if wow %}
       <div class="neko-card">
         <div id="users-container">
           <h1>Users</h1>
@@ -182,10 +181,11 @@
 {% endblock %}
 
 {% block script %}
-<script>
+<!-- <script>
   document.getElementById("submit-form").addEventListener('submit', function(e) {
     e.preventDefault();
     var text = document.getElementById("submit-text").value;
+		console.log('hi');
     if (text.length > 280) {
       alert("Posts cannot be longer than 280 characters");
       return;
@@ -196,12 +196,6 @@
     }
 
     this.submit();
-  });
-
-  document.getElementById("submission-link").addEventListener('click', function(e) {
-    e.preventDefault();
-    document.getElementById("submit-text").value += '[link]'
-    document.getElementById("submit-text").focus();
   });
 
   document.getElementById("submit-form-modal").addEventListener('submit', function(e) {
@@ -219,12 +213,6 @@
     this.submit();
   });
 
-  document.getElementById("submission-link-modal").addEventListener('click', function(e) {
-    e.preventDefault();
-    document.getElementById("submit-text-modal").value += '[link]';
-    document.getElementById("submit-text-modal").focus();
-  });
-
-</script>
+</script> -->
 
 {% endblock %}

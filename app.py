@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, session, url_for, redirect
-from db import login_user, register_user, get_public_content
+from db import login_user, register_user, get_public_content, post_content
+from utilities import login_required
 
 import os
 
@@ -11,7 +12,8 @@ def index():
     if 'email' not in session:
         return render_template('index.html')
 
-    posts = get_public_content()
+    _, posts = get_public_content()
+    print(posts)
     return render_template('index.html', email=session['email'],
                            fname=session['fname'], lname=session['lname'],
                            posts=posts)
@@ -25,15 +27,14 @@ def login():
     email = request.form['email']
     password = request.form['password']
 
-    user = login_user(email, password)
+    success, data = login_user(email, password)
 
-    if not user:
-        error = 'Invalid email or password'
-        return render_template('login.html', error=error)
+    if not success:
+        return render_template('login.html', error=data)
 
     session['email'] = email
-    session['fname'] = user['fname']
-    session['lname'] = user['lname']
+    session['fname'] = data['fname']
+    session['lname'] = data['lname']
     return redirect('/')
 
 
@@ -52,9 +53,9 @@ def register():
         error = 'Password does not match'
         return render_template('register.html', error=error)
 
-    if not register_user(email, password, fname, lname):
-        error = 'Email already exists'
-        return render_template('register.html', error=error)
+    success, message = register_user(email, password, fname, lname)
+    if not success:
+        return render_template('register.html', error=message)
 
     session['email'] = email
     session['fname'] = fname
@@ -68,6 +69,14 @@ def logout():
     return redirect('/')
 
 
+@app.route('/post', methods=['POST'])
+@login_required
+def post():
+    email = session['email']
+    post_content(email, 'test', 'file_contents_i_guess', True)
+    return redirect('/')
+
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
@@ -78,13 +87,6 @@ def page_not_found(e):
 # def bloggers():
 #     users = get_users()
 #     return render_template('bloggers.html', user_list=users)
-#
-#
-# @app.route('/post', methods=['POST'])
-# def post():
-#     username = session['username']
-#     create_post(username)
-#     return redirect('/')
 #
 #
 # @app.route('/posts')
