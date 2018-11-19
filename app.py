@@ -13,7 +13,6 @@ def index():
         return render_template('index.html')
 
     _, posts = get_public_content()
-    print(posts)
     return render_template('index.html', email=session['email'],
                            fname=session['fname'], lname=session['lname'],
                            posts=posts)
