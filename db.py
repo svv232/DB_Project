@@ -283,7 +283,7 @@ def share_with_group(email, fg_name, item_id):
     cursor = conn.cursor()
     insert = ('INSERT INTO Share VALUES ((SELECT owner_email from Belong WHERE email=%s), %s, %s)')
     cursor.execute(insert, (email, fg_name, item_id))
-    cursor.commit()
+    conn.commit()
     cursor.close()
     return True, "Success"
 
