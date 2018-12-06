@@ -159,7 +159,7 @@
       <div class="neko-card">
         <div id="users-container">
           <h1>Pending Tags</h1>
-          <ul id="users-list">
+          <ul id="tag-list">
             {% if not tags %}
               <li>
                 <div class="container-fluid no-friends">
@@ -169,17 +169,10 @@
             {% endif %}
             {% for tag in tags %}
             <li>
-              <div class="users-card container-fluid" data-toggle="modal" data-target="#groupModal">
+              <div class="tag-card container-fluid">
                 <div class="row">
                   <div class="col-sm-12">
-                    <div class="users-info">
-                      <span class="users-user">{{ group.fg_name }}</span>
-                      {% if group.owner_email == email %}
-                        <span class="users-verified"><i class="fas fa-paw"></i></span>
-                      {% endif %}
-                      <br>
-                      <span class="users-tag">{{ group.owner_email }}</span>
-                    </div>
+                    email tagged you in item name
                   </div>
                 </div>
               </div>
@@ -222,7 +215,7 @@
                 <div class="post-tagged">
                   <span class="bold">5 <span>Tags</span></span>
                   <span class="space"></span>
-                  <span class="bold">5 <span>Likes</span></span>
+                  <span class="bold">5 <span>Rates</span></span>
                 </div>
               </div>
             </div>
@@ -316,9 +309,11 @@
                   <li>Member</li>
                 </ul>
                 <h2>Add a Member</h2>
-                <form method="POST" action="group/add">
+                <form method="POST" action="group/invite">
                   <div class="form-group">
                     <div class="input-group">
+                      <input type="hidden" value="" name="fg_name">
+                      <input type="hidden" value="" name="owner_email">
         	            <input type="text" class="form-control" id="fname" placeholder="First Name" name="fname">
         							<input type="text" class="form-control" id="lname" placeholder="Last Name" name="lname">
         	          </div>
