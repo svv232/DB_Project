@@ -71,9 +71,8 @@ def get_my_content(email):
              '(SELECT item_id FROM Share INNER JOIN Belong ON '
              'Belong.fg_name=Share.fg_name AND '
              'Belong.owner_email=Share.owner_email AND Belong.email=%s) '
-             'OR is_pub ORDER BY post_time DESC'
-             'UNION'
-             '(SELECT itemd_id FROM ContentItem WHERE email_post=%s)')
+             'OR is_pub OR email_post=%s '
+             'ORDER BY post_time DESC')
     cursor.execute(query, (email, email))
     content = cursor.fetchall()
     cursor.close()
@@ -278,6 +277,7 @@ def filter_by_group(email, fg_name):
     content = cursor.fetchall()
     cursor.close()
     return True, content
+
 
 def share_with_group(email, fg_name, item_id):
     cursor = conn.cursor()
