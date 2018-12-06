@@ -122,7 +122,7 @@ def get_my_content_ids(email):
              'Belong.owner_email=Share.owner_email AND Belong.email=%s))'
              'OR is_pub')
 
-    cursor.execute(query, (email, ))
+    cursor.execute(query, (email))
     content = cursor.fetchall()
 
     cursor.close()
@@ -132,7 +132,7 @@ def get_my_content_ids(email):
 def count_tags(item_id):
     cursor = conn.cursor()
     query = ('SELECT COUNT(*) FROM TAG WHERE item_id=%s')
-    query.execute(query, (item_id))
+    cursor.execute(query, (item_id))
     content = cursor.fetchall()
     cursor.close()
     return content, f'found tag number for item_id {item_id}'
@@ -141,7 +141,7 @@ def count_tags(item_id):
 def get_tags_from_item_id(item_id):
     cursor = conn.cursor()
     query = ('SELECT * FROM TAG WHERE item_id=%s')
-    query.execute(query, (item_id))
+    cursor.execute(query, (item_id))
     content = cursor.fetchall()
     cursor.close()
     return content, f'found tags for item_id {item_id}'
@@ -149,21 +149,33 @@ def get_tags_from_item_id(item_id):
 
 def get_friend_group(email, fg_name, owner):
     cursor = conn.cursor()
-    query = ('SELECT * FROM Friendgroup WHERE fg_name, owner_email IN '
-             '(SELECT fg_name, owner_email FROM Friendgroup'
-             'WHERE owner_email=%s UNION SELECT fg_name, owner_email '
-             'FROM Belong WHERE email=%s) AND owner_email=%s AND fg_name=%s')
-    cursor.execute(query, (email, email, owner, fg_name))
+    query = ('SELECT * FROM Friendgroup WHERE owner_email=%s AND fg_name=%s '
+             'AND fg_name IN (SELECT fg_name FROM Friendgroup '
+             'WHERE owner_email=%s UNION SELECT fg_name '
+             'FROM Belong WHERE email=%s)')
+    cursor.execute(query, (owner, fg_name, email, email))
     content = cursor.fetchall()
     cursor.close()
-    return content, 'Successfully found friendgroup from primary keys'
+    return True, content[0]
+
+
+def get_friend_group_members(email, owner, fg_name):
+    cursor = conn.cursor()
+    query = ('SELECT email FROM Belong WHERE owner_email=%s AND fg_name=%s '
+             'AND fg_name IN (SELECT fg_name FROM Friendgroup '
+             'WHERE owner_email=%s UNION SELECT fg_name '
+             'FROM Belong WHERE email=%s)')
+    cursor.execute(query, (owner, fg_name, email, email))
+    content = cursor.fetchall()
+    cursor.close()
+    return True, content
 
 
 def accept_tag_on_content_item(email_tagged, email_tagger, item_id):
     cursor = conn.cursor()
     query = ('UPDATE Tag SET status=TRUE WHERE email_tagged=%s AND'
              'email_tagger=%s AND item_id=%s')
-    query.execute(query, (email_tagged, email_tagger, item_id))
+    cursor.execute(query, (email_tagged, email_tagger, item_id))
     cursor.close()
     return True, 'Successfully updated tag on content item'
 
@@ -172,7 +184,7 @@ def remove_tag_on_content_item(email_tagged, email_tagger, item_id):
     cursor = conn.cursor()
     query = ('DELETE FROM Tag WHERE email_tagged=%s '
              'AND email_tagger=%s AND item_id=%s')
-    query.execute(query, (email_tagged, email_tagger, item_id))
+    cursor.execute(query, (email_tagged, email_tagger, item_id))
     cursor.close()
     return True, 'Successfully deleted content item'
 
@@ -208,15 +220,15 @@ def add_friend(fname, lname, email, owner_email, fg_name):
     if not ((owner_email,) in content):
         return False, "You can only insert in groups you own"
 
-    query = ('SELECT email FROM Person WHERE email=%s' )
+    query = ('SELECT email FROM Person WHERE email=%s')
     cursor.execute(query, (email))
 
     content = cursor.fetchall()
     if not len(content):
         return False, "A Person with this email does not exist"
-    
+
     query = ("SELECT * from Belong WHERE email=%s AND owner_email=%s "
-            "AND fg_name=%s")
+             "AND fg_name=%s")
     cursor.execute(query, (email, owner_email, fg_name))
     content = cursor.fetchall()
     if len(content):
@@ -226,8 +238,10 @@ def add_friend(fname, lname, email, owner_email, fg_name):
              'VALUES (%s, %s, %s)')
 
     cursor.execute(query, (email, owner_email, fg_name))
+    conn.commit()
     cursor.close()
     return True, 'Successfully added user to friend group'
+
 
 def get_my_tags(email):
     cursor = conn.cursor()
@@ -236,6 +250,7 @@ def get_my_tags(email):
     content = cursor.fetchall()
     cursor.close()
     return True, content
+
 
 def filter_by_date(email, timestamp):
     cursor = conn.cursor()

@@ -136,7 +136,7 @@
             {% endif %}
             {% for group in groups %}
             <li>
-              <div class="users-card container-fluid" data-toggle="modal" data-target="#groupModal">
+              <div class="users-card container-fluid">
                 <div class="row">
                   <div class="col-sm-12">
                     <div class="users-info">
@@ -299,21 +299,19 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
-                <h1 class="friend-header">Friend Group Name <span class="users-verified"><i class="fas fa-paw"></i></span></h1>
-                <span class="friend-owner">owner_email</span>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                <h1 id="groupFriendName" class="friend-header">Friend Group Name <span class="users-verified"><i class="fas fa-paw"></i></span></h1>
+                <span id="groupFriendOwner" class="friend-owner">owner_email</span>
+                <p id="groupFriendDesc">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
                 <h2>Members</h2>
-                <ul>
-                  <li>Member</li>
-                  <li>Member</li>
+                <ul id="groupFriendMembers">
                 </ul>
                 <h2>Add a Member</h2>
                 <form method="POST" action="group/invite">
                   <div class="form-group">
                     <div class="input-group">
-                      <input type="hidden" value="" name="fg_name">
-                      <input type="hidden" value="" name="owner_email">
+                      <input id="groupFriendNameInput" type="hidden" value="" name="fg_name">
+                      <input id="groupFriendOwnerInput" type="hidden" value="" name="owner_email">
         	            <input type="text" class="form-control" id="fname" placeholder="First Name" name="fname">
         							<input type="text" class="form-control" id="lname" placeholder="Last Name" name="lname">
         	          </div>

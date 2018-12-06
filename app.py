@@ -3,7 +3,7 @@ from db import login_user, register_user, get_public_content, post_content
 from db import create_friend_group, get_my_content, get_my_friend_groups
 from db import get_content, get_friend_group, add_friend, get_my_tags
 from db import tag_content_item, remove_tag_on_content_item
-from db import accept_tag_on_content_item
+from db import accept_tag_on_content_item, get_friend_group_members
 from utilities import login_required
 
 import os
@@ -163,7 +163,15 @@ def get_group():
     fg_name = request.get_json().get('fg_name')
     owner_email = request.get_json().get('owner_email')
     _, content = get_friend_group(session['email'], fg_name, owner_email)
-    print(content)
+    return json.dumps(content)
+
+
+@app.route('/group/members', methods=['POST'])
+@login_required
+def get_group_members():
+    fg_name = request.get_json().get('fg_name')
+    owner = request.get_json().get('owner_email')
+    _, content = get_friend_group_members(session['email'], fg_name, owner)
     return json.dumps(content)
 
 
@@ -174,7 +182,7 @@ def invite_group():
     owner_email = request.form['owner_email']
     fname = request.form['fname']
     lname = request.form['lname']
-    add_friend(fname, lname, owner_email, fg_name)
+    add_friend(fname, lname, session['email'], owner_email, fg_name)
     return redirect('/')
 
 
@@ -183,7 +191,7 @@ def invite_group():
 def leave_group():
     fg_name = request.form['fg_name']
     owner_email = request.form['owner_email']
-    # Optional Feature 3 (Person 4)
+    # Optional Feature 3 (Oskar)
     # Remove from Belongs Table
     # Modify db.py
     # Return Value: Success or Error Message
@@ -211,7 +219,7 @@ def edit_profile():
     email = request.form['email']
     fname = request.form['fname']
     lname = request.form['lname']
-    # Optional Feature 5 (Person 4)
+    # Optional Feature 5 (Oskar)
     # Update Queries for User
     # Modify db.py
     # Assume params are accurate
