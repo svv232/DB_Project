@@ -1,4 +1,4 @@
-CREATE TABLE Person(
+CREATE TABLE Person (
     email VARCHAR(20),
     password CHAR(64),
     fname VARCHAR(20),
@@ -6,7 +6,7 @@ CREATE TABLE Person(
     PRIMARY KEY (email)
 );
 
-CREATE TABLE Friendgroup(
+CREATE TABLE Friendgroup (
     owner_email VARCHAR(20),
     fg_name VARCHAR(20),
     description VARCHAR(1000),
@@ -24,7 +24,7 @@ CREATE TABLE Belong (
     FOREIGN KEY(owner_email, fg_name) REFERENCES  Friendgroup(owner_email, fg_name)
 );
 
-CREATE TABLE ContentItem(
+CREATE TABLE ContentItem (
     item_id int AUTO_INCREMENT,
     email_post VARCHAR(20),
     post_time Timestamp,

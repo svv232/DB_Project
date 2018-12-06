@@ -78,24 +78,94 @@ def post():
     return redirect('/')
 
 
+@app.route('/posts')
+def get_posts():
+    # Optional Feature 7 (Person 1)
+    # Optional Feature 8 (Person 1)
+    # Modify
+    # Return Value: Posts in a list in the correct filtered order
+    # Filtering stuff
+    pass
+
+
+def rate():
+    # Optional Feature 1 (Person 2)
+    pass
+
+
+def tag():
+    # Required Feature 6
+    # Optional Feature 4 (tag group) (Person 2)
+    pass
+
+
+def accept_tag():
+    # Required Feature 4
+    pass
+
+
+def comment():
+    # Optional Feature 2 (Roy)
+    pass
+
+
+def create_group():
+    # Required Feature 7
+    pass
+
+
+def invite_group():
+    # Required Feature 7
+    pass
+
+
+@app.route('/group/leave', methods=['POST'])
+@login_required
+def leave_group():
+    group = request.form['group']
+    # Optional Feature 3 (Person 4)
+    # Remove from Belongs Table
+    # Modify db.py
+    # Return Value: Success or Error Message
+    # i.e. (True, 'Success') or (False, 'Group Doesn't Exist')
+    pass
+
+
+@app.route('/group/best', methods=['POST'])
+@login_required
+def best_group():
+    group = request.form['group']
+    # Optional Feature 6 (Person 5)
+    # Probably new table (but you can implement however you want)
+    # Add group to best friends table
+    # Modify db.py
+    # Return Value: Success or Error Message
+    # i.e. (True, 'Success') or (False, 'Group Doesn't Exist')
+    pass
+
+
+@app.route('/profile', methods=['POST'])
+@login_required
+def edit_profile():
+    email = request.form['email']
+    fname = request.form['fname']
+    lname = request.form['lname']
+    # Optional Feature 5 (Person 4)
+    # Update Queries for User
+    # Modify db.py
+    # Assume params are accurate
+    #   (if not changing fname, it'll be original fname)
+    # Return Value: Success or Error Message
+    # i.e. (True, 'Success') or (False, 'Email already exists')
+    pass
+
+
+# Done:
+# Required Features: 1, 2, 3, 5
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
-
-
-#
-# @app.route('/bloggers')
-# def bloggers():
-#     users = get_users()
-#     return render_template('bloggers.html', user_list=users)
-#
-#
-# @app.route('/posts')
-# def posts():
-#     poster = request.args['poster']
-#     posts = get_posts(poster)
-#     return render_template('posts.html', poster_name=poster, posts=posts)
-#
 
 
 app.secret_key = os.urandom(24)

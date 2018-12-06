@@ -21,9 +21,6 @@
 					{% endif %}
         </div>
       </li>
-      <li class="nav-item">
-        <button type="button" class="nav-link btn meow" data-toggle="modal" data-target="#submit-modal">Meow</button>
-      </li>
     </ul>
   </div>
 </nav>
@@ -67,33 +64,21 @@
               </div>
             </div>
           </div>
-          <!-- <button type="button" id="submission-link" class="btn submission-link"><i class="fas fa-link"></i></button> -->
           <form id="submit-form" action="post" method="POST">
-            <button type="submit" type="button" class="meow btn submission-button">Meow</button>
+            <button type="submit" class="meow btn submission-button">Meow</button>
           </form>
         </div>
         <ul id="post-container">
           {% for post in posts %}
           <li>
-            <div class="post container-fluid" onclick="location.href='/post?instance={{ post.instance }}&id={{ post.id }}'">
-              <div class="dropdown report-button-container">
-                <button class="btn btn-secondary dropdown-toggle report-button" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <i class="fas fa-angle-down"></i>
-                </button>
-                <!-- <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <h8 class="dropdown-header report-header">Report</h8>
-                  <a class="dropdown-item" href="report?id={{ post.id }}&instance={{ post.instance }}">Inappropriate Content</a>
-                  <a class="dropdown-item" href="report?id={{ post.id }}&instance={{ post.instance }}">Offensive Language</a>
-                  <a class="dropdown-item" href="report?id={{ post.id }}&instance={{ post.instance }}">Broken Link</a>
-                </div> -->
-              </div>
+            <div class="post container-fluid" data-toggle="modal" data-target="#postModal">
               <div class="row">
                 <div class="col-sm-1">
                   <div class="post-profile"><i class="fas fa-user"></i></div>
                 </div>
                 <div class="col-sm-11">
                   <div class="post-info">
-                    <span class="post-user">{{ post['item_name'] }}</span> <span class="post-tag">{{ post['email_post'] }}</span>
+                    <span class="post-user">{{ post['item_name'] }}</span><span class="post-tag"> • </span><span class="post-tag">{{ post['email_post'] }}</span>
                   </div>
                   <div class="post-content">
                     {{ post['file_path'] }}
@@ -110,6 +95,16 @@
                       </a>
                     {% endif %}
                   </div>
+                  <div class="post-footer">
+                    {% if email %}
+                    <div class="post-actions">
+                      <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Tag"><i class="far fa-hand-peace"></i> <span class="post-action-count">5</span></button>
+                      <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Rate"><i class="far fa-grin"></i> <span class="post-action-count">5</span></button>
+                      <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Comment"><i class="far fa-comment"></i> <span class="post-action-count">5</span></button>
+                    </div>
+                    {% endif %}
+                    <span class="post-time">{{ post['post_time'] }}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -119,12 +114,20 @@
       </div>
     </div>
     <div class="col-sm-3">
-			{% if wow %}
+			{% if email %}
       <div class="neko-card">
         <div id="users-container">
-          <h1>Users</h1>
+          <h1>Friend Groups</h1>
+          <button type="submit" class="btn friend-btn">Create</button>
           <ul id="users-list">
-            {% for user in users %}
+            {% if not friends %}
+              <li>
+                <div class="container-fluid no-friends">
+                  You are not in any friend groups :(
+                </div>
+              </li>
+            {% endif %}
+            {% for friend in friends %}
             <li>
               <div class="users-card container-fluid">
                 <div class="row">
@@ -151,32 +154,53 @@
 			{% endif %}
     </div>
   </div>
-
-  <div class="modal fade" id="submit-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal fade" id="postModal" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog" role="document">
-    <div class="modal-content submission-modal-content">
-      <div class="modal-header submission-modal-header">
-        <h5 class="modal-title">Meow Meow Meow</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body submission-modal-body">
-        <div class="submission">
-          <div class="container-fluid submission-container">
-            <div class="submission-row row">
-              <div class="col-sm-1">
-                <div class="submission-profile"><i class="fas fa-user"></i></div>
-              </div>
-              <div class="submission-col col-sm-11">
-                <textarea id="submit-text-modal" placeholder="meow meow meow meow?" name="submission-text" class="submission-text" form="submit-form-modal"></textarea>
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-sm-1">
+              <div class="post-profile"><i class="fas fa-user"></i></div>
+            </div>
+            <div class="col-sm-11">
+              <div class="post-info">
+                <p class="post-user">user</p>
+                <p class="post-tag">email</p>
               </div>
             </div>
           </div>
-          <button type="button" id="submission-link-modal" class="submission-link btn"><i class="fas fa-link"></i></button>
-          <form id="submit-form-modal" action="newpost" method="post">
-            <button type="submit" class="meow btn submission-button">Meow</button>
-          </form>
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="post-content">
+                content
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="post-tagged">
+
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12">
+              <div class="post-footer">
+                {% if email %}
+                <div class="post-actions">
+                  <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Tag"><i class="far fa-hand-peace"></i> <span class="post-action-count">5</span></button>
+                  <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Rate"><i class="far fa-grin"></i> <span class="post-action-count">5</span></button>
+                  <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Comment"><i class="far fa-comment"></i> <span class="post-action-count">5</span></button>
+                </div>
+                {% endif %}
+                <span class="post-time">time</span>
+              </div>
+              <div class="post-comment">
+
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -185,6 +209,11 @@
 {% endblock %}
 
 {% block script %}
+<script>
+  $(function () {
+    $('[data-toggle="popover"]').popover({ trigger: "hover" });
+  })
+</script>
 <!-- <script>
   document.getElementById("submit-form").addEventListener('submit', function(e) {
     e.preventDefault();
