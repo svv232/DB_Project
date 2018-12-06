@@ -44,7 +44,7 @@ def register_user(email, password, fname, lname):
 def get_public_content():
     cursor = conn.cursor()
     query = ('SELECT item_id, email_post, post_time, file_path, item_name ' +
-             'FROM ContentItem WHERE is_pub = TRUE AND post_time <= now() + ' +
+             'FROM ContentItem WHERE is_pub = TRUE AND post_time >= now() - ' +
              'INTERVAL 1 DAY')
     cursor.execute(query)
     posts = cursor.fetchall()

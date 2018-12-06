@@ -53,6 +53,7 @@
     </div>
     <div class="col-sm-6">
       <div class="neko-card">
+        {% if email %}
         <div class="submission">
           <div class="container-fluid submission-container">
             <div class="submission-row row">
@@ -68,6 +69,7 @@
             <button type="submit" class="meow btn submission-button">Meow</button>
           </form>
         </div>
+        {% endif %}
         <ul id="post-container">
           {% for post in posts %}
           <li>
