@@ -138,6 +138,31 @@ def add_friend(email, owner_email, fg_name):
     cursor.close()
     return True, 'Successfully added user to friend group'
 
+def filter_by_date(email, timestamp):
+    cursor = conn.cursor()
+    query = ('SELECT * FROM ContentItem WHERE item_id IN ' +
+             '(SELECT item_id FROM Share INNER JOIN Belong ON ' +
+             'Belong.fg_name=Share.fg_name AND ' +
+             'Belong.owner_email=Share.owner_email AND Belong.email=%s) ' +
+             'OR is_pub AND post_time=%s')
+    cursor.execute(query, (email, timestamp))
+    content = cursor.fetchall()
+    cursor.close()
+    return True, content
+
+
+def filter_by_group(email, fg_name):
+    cursor = conn.cursor()
+    query = ('SELECT * FROM ContentItem WHERE item_id IN ' +
+             '(SELECT item_id FROM Share INNER JOIN Belong ON ' +
+             'Belong.fg_name=Share.fg_name AND ' +
+             'Belong.owner_email=Share.owner_email AND Belong.email=%s '
+             'AND fg_name=%s;')
+    cursor.execute(query, (email, fg_name))
+    content = cursor.fetchall()
+    cursor.close()
+    return True, content
+
 
 # def get_pending_tag(user, action):
 #     cursor = conn.cursor()
