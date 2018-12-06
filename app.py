@@ -163,6 +163,7 @@ def get_group():
     fg_name = request.get_json().get('fg_name')
     owner_email = request.get_json().get('owner_email')
     _, content = get_friend_group(session['email'], fg_name, owner_email)
+    print(content)
     return json.dumps(content)
 
 

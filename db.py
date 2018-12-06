@@ -131,39 +131,41 @@ def get_my_content_ids(email):
 
 def count_tags(item_id):
     cursor = conn.cursor()
-    query = ("SELECT COUNT(*) FROM TAG WHERE item_id=%s")
+    query = ('SELECT COUNT(*) FROM TAG WHERE item_id=%s')
     query.execute(query, (item_id))
     content = cursor.fetchall()
     cursor.close()
-    return content, f"found tag number for item_id {item_id}"
+    return content, f'found tag number for item_id {item_id}'
 
 
 def get_tags_from_item_id(item_id):
     cursor = conn.cursor()
-    query = ("SELECT * FROM TAG WHERE item_id=%s")
+    query = ('SELECT * FROM TAG WHERE item_id=%s')
     query.execute(query, (item_id))
     content = cursor.fetchall()
     cursor.close()
-    return content, f"found tags for item_id {item_id}"
+    return content, f'found tags for item_id {item_id}'
 
 
-def get_friend_group_by_primkey(fg_name, email):
+def get_friend_group(email, fg_name, owner):
     cursor = conn.cursor()
-    query = ("SELECT fg_name, email FROM Friendgroup where "
-             "owner_email=%s AND fg_name=%s")
-    cursor.execute(query, (email, fg_name))
+    query = ('SELECT * FROM Friendgroup WHERE fg_name, owner_email IN '
+             '(SELECT fg_name, owner_email FROM Friendgroup'
+             'WHERE owner_email=%s UNION SELECT fg_name, owner_email '
+             'FROM Belong WHERE email=%s) AND owner_email=%s AND fg_name=%s')
+    cursor.execute(query, (email, email, owner, fg_name))
     content = cursor.fetchall()
     cursor.close()
-    return content, "Successfully found friendgroup from primary keys"
+    return content, 'Successfully found friendgroup from primary keys'
 
 
 def accept_tag_on_content_item(email_tagged, email_tagger, item_id):
     cursor = conn.cursor()
-    query = ("UPDATE Tag SET status=TRUE WHERE email_tagged=%s AND"
-             "email_tagger=%s AND item_id=%s")
+    query = ('UPDATE Tag SET status=TRUE WHERE email_tagged=%s AND'
+             'email_tagger=%s AND item_id=%s')
     query.execute(query, (email_tagged, email_tagger, item_id))
     cursor.close()
-    return True, "Successfully updated tag on content item"
+    return True, 'Successfully updated tag on content item'
 
 
 def remove_tag_on_content_item(email_tagged, email_tagger, item_id):
@@ -249,8 +251,4 @@ def add_comment(commenter_email, item_id):
 
 
 def get_comments(item_id):
-    pass
-
-
-def get_friend_group():
     pass
