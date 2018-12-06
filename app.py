@@ -1,9 +1,11 @@
 from flask import Flask, render_template, request, session, url_for, redirect
 from db import login_user, register_user, get_public_content, post_content
 from db import create_friend_group, get_my_content, get_my_friend_groups
+from db import get_content
 from utilities import login_required
 
 import os
+import json
 
 app = Flask(__name__)
 
@@ -78,6 +80,15 @@ def post():
     post = request.form.get('submission-text')
     post_content(email, 'test', post, True)
     return redirect('/')
+
+
+@app.route('/get_post', methods=['POST'])
+@login_required
+def get_post():
+    item_id = request.get_json().get('item_id')
+    _, post = get_content(session['email'], item_id)
+    post['post_time'] = str(post['post_time'])
+    return json.dumps(post)
 
 
 @app.route('/posts')
