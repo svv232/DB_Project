@@ -4,6 +4,7 @@ from db import create_friend_group, get_my_content, get_my_friend_groups
 from db import get_content, get_friend_group, add_friend, get_my_tags
 from db import tag_content_item, remove_tag_on_content_item
 from db import accept_tag_on_content_item, get_friend_group_members
+from db import get_tags_from_item_id
 from utilities import login_required
 
 import os
@@ -125,6 +126,19 @@ def tag():
     # Return Value: Success or Error Message
     # i.e. (True, 'Success') or (False, 'Post does not exist')
     return redirect('/')
+
+
+@app.route('/tag/get', methods=['POST'])
+@login_required
+def get_tag():
+    item_id = request.get_json().get('item_id')
+    _, content = get_tags_from_item_id(item_id)
+    # Optional Feature 4 (tag group) (Person 2)
+    # Modify db.py
+    # Idk add tagging groups
+    # Return Value: Success or Error Message
+    # i.e. (True, 'Success') or (False, 'Post does not exist')
+    return json.dumps(content)
 
 
 @app.route('/tag/review')

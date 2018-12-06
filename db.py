@@ -129,22 +129,22 @@ def get_my_content_ids(email):
     return content, 'Successfully Got Content!'
 
 
-def count_tags(item_id):
+def count_Tags(item_id):
     cursor = conn.cursor()
-    query = ('SELECT COUNT(*) FROM TAG WHERE item_id=%s')
+    query = ('SELECT COUNT(*) FROM Tag WHERE item_id=%s')
     cursor.execute(query, (item_id))
     content = cursor.fetchall()
     cursor.close()
-    return content, f'found tag number for item_id {item_id}'
+    return content, f'found Tag number for item_id {item_id}'
 
 
-def get_tags_from_item_id(item_id):
+def get_Tags_from_item_id(item_id):
     cursor = conn.cursor()
-    query = ('SELECT * FROM TAG WHERE item_id=%s')
+    query = ('SELECT * FROM Tag WHERE item_id=%s')
     cursor.execute(query, (item_id))
     content = cursor.fetchall()
     cursor.close()
-    return content, f'found tags for item_id {item_id}'
+    return True, content
 
 
 def get_friend_group(email, fg_name, owner):
@@ -171,45 +171,45 @@ def get_friend_group_members(email, owner, fg_name):
     return True, content
 
 
-def accept_tag_on_content_item(email_tagged, email_tagger, item_id):
+def accept_Tag_on_content_item(email_Tagged, email_Tagger, item_id):
     cursor = conn.cursor()
-    query = ('UPDATE Tag SET status=TRUE WHERE email_tagged=%s AND'
-             'email_tagger=%s AND item_id=%s')
-    cursor.execute(query, (email_tagged, email_tagger, item_id))
+    query = ('UPDATE Tag SET status=TRUE WHERE email_Tagged=%s AND'
+             'email_Tagger=%s AND item_id=%s')
+    cursor.execute(query, (email_Tagged, email_Tagger, item_id))
     cursor.close()
-    return True, 'Successfully updated tag on content item'
+    return True, 'Successfully updated Tag on content item'
 
 
-def remove_tag_on_content_item(email_tagged, email_tagger, item_id):
+def remove_Tag_on_content_item(email_Tagged, email_Tagger, item_id):
     cursor = conn.cursor()
-    query = ('DELETE FROM Tag WHERE email_tagged=%s '
-             'AND email_tagger=%s AND item_id=%s')
-    cursor.execute(query, (email_tagged, email_tagger, item_id))
+    query = ('DELETE FROM Tag WHERE email_Tagged=%s '
+             'AND email_Tagger=%s AND item_id=%s')
+    cursor.execute(query, (email_Tagged, email_Tagger, item_id))
     cursor.close()
     return True, 'Successfully deleted content item'
 
 
-def tag_content_item(email_tagged, email_tagger, item_id):
-    my_ids, _ = get_my_content_ids(email_tagger)
+def Tag_content_item(email_Tagged, email_Tagger, item_id):
+    my_ids, _ = get_my_content_ids(email_Tagger)
     visibility = (item_id,) in get_my_content_ids(item_id)
 
     if not visibility:
-        return None, 'ContentItem is not accessible to the current tagger'
+        return None, 'ContentItem is not accessible to the current Tagger'
 
-    if email_tagged == email_tagger:
+    if email_Tagged == email_Tagger:
         query = ('INSERT INTO Tag'
-                 '(email_tagged, email_tagger, item_id, status, tagtime)'
+                 '(email_Tagged, email_Tagger, item_id, status, Tagtime)'
                  'VALUES (%s, %s, %s, TRUE, NOW())')
     else:
-        query = ('INSERT INTO tag'
-                 '(email_tagged, email_tagger, item_id, status, tagtime) '
+        query = ('INSERT INTO Tag'
+                 '(email_Tagged, email_Tagger, item_id, status, Tagtime) '
                  'VALUES (%s, %s, %s, FALSE, NOW())')
 
     cursor = conn.cursor()
-    cursor.execute(query, (email_tagged, email_tagger, item_id))
+    cursor.execute(query, (email_Tagged, email_Tagger, item_id))
     content = cursor.fetchall()
     cursor.close()
-    return content, 'Successfully tagged ContentItem'
+    return content, 'Successfully Tagged ContentItem'
 
 
 def add_friend(fname, lname, email, owner_email, fg_name):
@@ -243,9 +243,9 @@ def add_friend(fname, lname, email, owner_email, fg_name):
     return True, 'Successfully added user to friend group'
 
 
-def get_my_tags(email):
+def get_my_Tags(email):
     cursor = conn.cursor()
-    query = ('SELECT * FROM TAG WHERE email_tagged=%s AND status=FALSE')
+    query = ('SELECT * FROM Tag WHERE email_Tagged=%s AND status=FALSE')
     cursor.execute(query, (email))
     content = cursor.fetchall()
     cursor.close()
@@ -277,9 +277,9 @@ def filter_by_group(email, fg_name):
     cursor.close()
     return True, content
 
-# def get_pending_tag(user, action):
+# def get_pending_Tag(user, action):
 #     cursor = conn.cursor()
-#     message = f'{action} for tag was successfully done!!'#     if action == 'accept':
+#     message = f'{action} for Tag was successfully done!!'#     if action == 'accept':
 #         status, query = (''),
 #     elif action == 'decline':
 #         status, query = (''),
@@ -290,9 +290,9 @@ def filter_by_group(email, fg_name):
 #         status, query = ('')
 #
 #     cursor.execute(query)
-#     tag = cursor.fetchall()
+#     Tag = cursor.fetchall()
 #     cursor.close()
-#     return status, tag
+#     return status, Tag
 
 
 
@@ -304,6 +304,8 @@ def filter_by_group(email, fg_name):
 #     cursor.close()
 #
 #     return users
+
+
 def add_comment(commenter_email, item_id):
     pass
 

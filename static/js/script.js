@@ -21,6 +21,8 @@ Array.from(posts).forEach(function(element) {
       document.getElementById('postModalContent').innerHTML = content['file_path'];
       document.getElementById('postModalName').innerHTML = content['item_name'];
       document.getElementById('postModalDate').innerHTML = content['post_time'];
+      document.getElementById('postTag').setAttribute('post-id', content['item_id']);
+      document.getElementById('postRate').setAttribute('post-id', content['item_id']);
       $('#postModal').modal('show');
     });
   });
@@ -70,4 +72,45 @@ Array.from(groups).forEach(function(element) {
       document.getElementById('groupFriendMembers').innerHTML = '<li>No members 😥</li>';
     });
   });
+});
+
+document.getElementById('postTag').addEventListener('click', function(e) {
+  e.preventDefault();
+  fetch('http://localhost:5000/tag/get', {
+    method: 'POST',
+    body: JSON.stringify({item_id: this.getAttribute('post-id')}),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then(function(response) {
+    return response.json();
+  })
+  .then(function(content) {
+    document.getElementById('taggedEmails').innerHTML = ''
+    for (tagged in content) {
+      document.getElementById('taggedEmails').innerHTML += '<li>' + content['email'] + '</li>'
+    }
+    $('#tagModal').modal('show');
+  });
+});
+
+document.getElementById('postRate').addEventListener('click', function(e) {
+  e.preventDefault();
+
+});
+
+document.getElementById('commentButton').addEventListener('click', function(e) {
+  e.preventDefault();
+  document.getElementById('postCommentForm').focus();
+});
+
+var modal_lv = 0;
+$('.modal').on('shown.bs.modal', function (e) {
+    $('.modal-backdrop:last').css('zIndex',1051+modal_lv);
+    $(e.currentTarget).css('zIndex',1052+modal_lv);
+    modal_lv++
+});
+
+$('.modal').on('hidden.bs.modal', function (e) {
+    modal_lv--
 });

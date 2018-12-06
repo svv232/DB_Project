@@ -103,13 +103,6 @@
                     {% endif %}
                   </div>
                   <div class="post-footer">
-                    {% if email %}
-                    <div class="post-actions">
-                      <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Tag"><i class="far fa-hand-peace"></i> <span class="post-action-count">5</span></button>
-                      <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Rate"><i class="far fa-grin"></i> <span class="post-action-count">5</span></button>
-                      <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Comment"><i class="far fa-comment"></i> <span class="post-action-count">5</span></button>
-                    </div>
-                    {% endif %}
                     <span class="post-time">{{ post['post_time'] }}</span>
                   </div>
                 </div>
@@ -213,9 +206,9 @@
             <div class="row">
               <div class="col-sm-12">
                 <div class="post-tagged">
-                  <span class="bold">5 <span>Tags</span></span>
+                  <span id="postTag" class="bold" post-id="">5 <span>Tags</span></span>
                   <span class="space"></span>
-                  <span class="bold">5 <span>Rates</span></span>
+                  <span id="postRate" class="bold" post-id="">5 <span>Rates</span></span>
                 </div>
               </div>
             </div>
@@ -224,10 +217,26 @@
                 <div class="post-footer">
                   {% if email %}
                   <div class="post-actions">
-                    <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Tag"><i class="far fa-hand-peace"></i> <span class="post-action-count">5</span></button>
-                    <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Rate"><i class="far fa-grin"></i> <span class="post-action-count">5</span></button>
-                    <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Comment"><i class="far fa-comment"></i> <span class="post-action-count">5</span></button>
+                    <div class="dropdown">
+                      <button id="tagButton" type="button" class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span data-toggle="popover" data-placement="top" data-content="Tag" data-container="body"><i class="far fa-hand-peace"></i></span></button>
+                      <form class="dropdown-menu tag-menu" aria-labelledby="tagButton">
+                        <div class="form-group">
+                          <input type="email" class="form-control" placeholder="Tag Email" name="tagged-email">
+                          <button type="submit" class="btn">Tag</button>
+                        </div>
+                      </form>
+                    </div>
+                    <div class="dropdown">
+                      <button id="rateButton" type="button" class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span data-toggle="popover" data-placement="top" data-content="Rate" data-container="body"><i class="far fa-grin"></i></span></button>
+                      <div class="dropdown-menu" aria-labelledby="rateButton">
+                          <a class="dropdown-item" href="#">Action</a>
+                          <a class="dropdown-item" href="#">Another action</a>
+                          <a class="dropdown-item" href="#">Something else here</a>
+                      </div>
+                    </div>
+                    <button id="commentButton" type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Comment"><i class="far fa-comment"></i></button>
                   </div>
+
                   {% endif %}
                   <span id="postModalDate" class="post-time">time</span>
                 </div>
@@ -252,7 +261,7 @@
         <div class="container-fluid post-comment">
           <div class="row">
             <div class="col-sm-12">
-              <textarea placeholder="Comment" class="comment-text" name="comment" form="comment-form"></textarea>
+              <textarea id="postCommentForm" placeholder="Comment" class="comment-text" name="comment" form="comment-form"></textarea>
               <form id="comment-form" action="post" method="POST">
                 <button type="submit" class="meow btn comment-button">Meow</button>
               </form>
@@ -321,6 +330,47 @@
         					</div>
                 </form>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="tagModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-sm tag-modal" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="container-fluid friend-container">
+          <div class="row">
+            <div class="col-sm-12">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h1 class="friend-header">Tagged</h1>
+              <ul id="taggedEmails">
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="rateModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-sm tag-modal" role="document">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="container-fluid friend-container">
+          <div class="row">
+            <div class="col-sm-12">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h1 class="friend-header">Tagged</h1>
+              <ul id="rateList">
+              </ul>
             </div>
           </div>
         </div>

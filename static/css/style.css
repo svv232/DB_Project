@@ -260,11 +260,6 @@ textarea:focus {
   color: #657786;
 }
 
-.post-actions button:hover {
-  background-color: transparent;
-  color: #4AB3F4;
-}
-
 .post-actions button:focus {
   outline: none;
   box-shadow: none;
@@ -675,4 +670,45 @@ textarea:focus {
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+#postModal .post-actions button:hover {
+  background-color: transparent;
+  color: #4AB3F4;
+}
+
+.tag-menu {
+  padding: 0;
+  border: 0;
+  width: 250px;
+}
+
+.tag-menu .form-group {
+  margin: 0;
+  display: flex;
+}
+
+.tag-menu input {
+  display: inline-block;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  font-size: 14px;
+}
+
+.tag-menu button {
+  background-color: #4AB3F4;
+  color: white;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  width: 80px;
+  font-size: 14px;
+}
+
+.tag-menu button:hover {
+  background-color: #1DA1F2 !important;
+  color: white !important;
+}
+
+.tag-modal {
+  margin-top: 100px;
 }
