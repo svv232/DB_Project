@@ -24,8 +24,9 @@ def login_user(email, password):
 
 
 def register_user(email, password, fname, lname):
-    if len(email) > 20 or len(fname) > 20 or len(lname):
+    if len(email) > 20 or len(fname) > 20 or len(lname) > 20:
         return False, "All field lengths must be less than 20 characters"
+
     cursor = conn.cursor()
     query = 'SELECT * FROM Person WHERE email = %s'
     cursor.execute(query, (email))
