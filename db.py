@@ -49,7 +49,6 @@ def get_public_content():
     cursor.execute(query)
     posts = cursor.fetchall()
     cursor.close()
-
     return True, posts
 
 
@@ -60,17 +59,60 @@ def post_content(email_post, item_name, file_path, is_pub):
     cursor.execute(query, (email_post, file_path, item_name, is_pub))
     conn.commit()
     cursor.close()
-
     return True, "Item Sucessfully Posted"
 
 
-# def get_my_content(friend_group):
-#     cursor = conn.cursor()
-#     query = (f'')
-#     cursor.execute(query)
-#     content = cursor.fetchall()
-#     cursor.close()
-#     return content, "Successfully Got Content!"
+def get_my_content(email):
+    cursor = conn.cursor()
+    query = "select * from ContentItem WHERE item_id in (select item_id from Share inner join Belong on Belong.fg_name=Share.fg_name AND Belong.owner_email =Share.owner_email AND Belong.email=%s)) OR is_pub"
+    cursor.execute(query)
+    content = cursor.fetchall()
+    cursor.close()
+    return content, "Successfully Got Content!"
+
+def create_friend_group(owner_email, fg_name, description):
+    cursor = conn.cursor()
+    query = ("INSERT INTO Friendgroup" + 
+            "(owner_email,fg_name,description) values (%s, %s, %s)")
+    cursor.execute(query, (owner_email, fg_name, description))
+    content = cursor.fetchall()
+    cursor.close()
+    return content, "Successfully Created FriendGroup"
+
+def get_my_content_ids(email):
+    cursor = conn.cursor()
+    query = ("select item_id from ContentItem where" +
+    "item_id in (select item_id from Share inner join Belong on" + 
+    "Belong.fg_name=Share.fg_name AND Belong.owner_email =Share.owner_email AND Belong.email=%s)) OR is_pub")
+
+    cursor.execute(query, (email, ))
+    content = cursor.fetchall()
+
+    cursor.close()
+    return content, "Successfully Got Content!"
+
+def tag_content_item(email_tagged, email_tagger, 
+        item_id,status):
+
+    my_ids, _ = get_my_content_ids(email_tagger)
+    visibility = (item_id,) in get_my_content_ids(item_id)
+    if not visibility:
+        return None, "ContentItem is not accessible to the current tagger"
+    query = ("INSERT INTO Tag" + 
+    "(email_tagged, email_tagger, item_id, status, tagtime)" + "values (%s, %s, %s, %s, NOW())")
+    cursor = conn.cursor()
+    cursor.execute(query,(email_tagged,email_tagger,item_id,status))
+    content = cursor.fetchall()
+    cursor.close()
+    return content, "Successfully Created FriendGroup"
+
+def add_friend(email, owner_email, fg_name):
+    cursor = conn.cursor()
+    query = "INSERT into Belong (email, owner_email, fg_name) VALUES (%s, %s, %s)"
+    cursor.execute(query, (email, owner_email, fg_name))
+    # TODO: err check here to see if primary key collisions? if true rollback to prev state
+    cursor.close()
+    return True, "Successfully added user to friend group"
 
 
 # def get_pending_tag(user, action):
@@ -91,13 +133,6 @@ def post_content(email_post, item_name, file_path, is_pub):
 #     cursor.close()
 #     return status, tag
 
-
-# def tag_content(content, tagged):
-#     pass
-#
-#
-# def add_friend(user, friend):
-#     pass
 
 
 # def get_users(email):
