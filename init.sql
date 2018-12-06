@@ -14,7 +14,6 @@ CREATE TABLE Friendgroup (
     FOREIGN KEY (owner_email) REFERENCES Person(email)
 );
 
-
 CREATE TABLE Belong (
     email VARCHAR(20),
     owner_email VARCHAR(20),
