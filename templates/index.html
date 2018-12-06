@@ -71,9 +71,14 @@
         </div>
         {% endif %}
         <ul id="post-container">
+          {% if not posts %}
+            <div class="post-filler">
+              No public posts 😥
+            </div>
+          {% endif %}
           {% for post in posts %}
           <li>
-            <div class="post container-fluid" data-toggle="modal" data-target="#postModal">
+            <div class="post container-fluid" post-id="{{ post['item_id'] }}">
               <div class="row">
                 <div class="col-sm-1">
                   <div class="post-profile"><i class="fas fa-user"></i></div>
@@ -120,30 +125,60 @@
       <div class="neko-card">
         <div id="users-container">
           <h1>Friend Groups</h1>
-          <button type="submit" class="btn friend-btn" data-toggle="modal" data-target="#groupModal">Create</button>
+          <button type="submit" class="btn friend-btn" data-toggle="modal" data-target="#groupCreateModal">Create</button>
           <ul id="users-list">
-            {% if not friends %}
+            {% if not groups %}
               <li>
                 <div class="container-fluid no-friends">
-                  You are not in any friend groups :(
+                  You are not in any friend groups 😥
                 </div>
               </li>
             {% endif %}
-            {% for friend in friends %}
+            {% for group in groups %}
             <li>
-              <div class="users-card container-fluid">
+              <div class="users-card container-fluid" data-toggle="modal" data-target="#groupModal">
                 <div class="row">
-                  <div class="col-sm-3">
-                    <div class="users-profile"><i class="fas fa-user"></i></div>
-                  </div>
-                  <div class="col-sm-8">
+                  <div class="col-sm-12">
                     <div class="users-info">
-                      <span class="users-user">{{ user.name }}</span>
-                      {% if user.verified %}
+                      <span class="users-user">{{ group.fg_name }}</span>
+                      {% if group.owner_email == email %}
                         <span class="users-verified"><i class="fas fa-paw"></i></span>
                       {% endif %}
                       <br>
-                      <span class="users-tag">@{{ user.username }}</span>
+                      <span class="users-tag">{{ group.owner_email }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <br>
+      <div class="neko-card">
+        <div id="users-container">
+          <h1>Pending Tags</h1>
+          <ul id="users-list">
+            {% if not tags %}
+              <li>
+                <div class="container-fluid no-friends">
+                  You have no pending tags
+                </div>
+              </li>
+            {% endif %}
+            {% for tag in tags %}
+            <li>
+              <div class="users-card container-fluid" data-toggle="modal" data-target="#groupModal">
+                <div class="row">
+                  <div class="col-sm-12">
+                    <div class="users-info">
+                      <span class="users-user">{{ group.fg_name }}</span>
+                      {% if group.owner_email == email %}
+                        <span class="users-verified"><i class="fas fa-paw"></i></span>
+                      {% endif %}
+                      <br>
+                      <span class="users-tag">{{ group.owner_email }}</span>
                     </div>
                   </div>
                 </div>
@@ -170,14 +205,14 @@
               </div>
               <div class="col-sm-11">
                 <div class="post-info">
-                  <p class="post-user">user</p>
-                  <p class="post-tag">email</p>
+                  <p id="postModalName" class="post-user">user</p>
+                  <p id="postModalEmail" class="post-tag">email</p>
                 </div>
               </div>
             </div>
             <div class="row">
               <div class="col-sm-12">
-                <div class="post-content">
+                <div id="postModalContent" class="post-content">
                   content
                 </div>
               </div>
@@ -185,7 +220,9 @@
             <div class="row">
               <div class="col-sm-12">
                 <div class="post-tagged">
-
+                  <span class="bold">5 <span>Tags</span></span>
+                  <span class="space"></span>
+                  <span class="bold">5 <span>Likes</span></span>
                 </div>
               </div>
             </div>
@@ -199,19 +236,40 @@
                     <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Comment"><i class="far fa-comment"></i> <span class="post-action-count">5</span></button>
                   </div>
                   {% endif %}
-                  <span class="post-time">time</span>
-                </div>
-                <div class="post-comment">
-
+                  <span id="postModalDate" class="post-time">time</span>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+        <div class="container-fluid">
+          <div class="row">
+            <ul class="post-comments">
+              <li>
+                <div class="post-info">
+                  <span class="post-user">Full Name</span><span class="post-tag"> • </span><span class="post-tag"> EMAIL </span>
+                </div>
+                <p>
+                  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                </p>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="container-fluid post-comment">
+          <div class="row">
+            <div class="col-sm-12">
+              <textarea placeholder="Comment" class="comment-text" name="comment" form="comment-form"></textarea>
+              <form id="comment-form" action="post" method="POST">
+                <button type="submit" class="meow btn comment-button">Meow</button>
+              </form>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div class="modal fade" id="groupModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal fade" id="groupCreateModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-body">
@@ -238,47 +296,47 @@
       </div>
     </div>
   </div>
+  <div class="modal fade" id="groupModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="container-fluid friend-container">
+            <div class="row">
+              <div class="col-sm-12">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                <h1 class="friend-header">Friend Group Name <span class="users-verified"><i class="fas fa-paw"></i></span></h1>
+                <span class="friend-owner">owner_email</span>
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+                <h2>Members</h2>
+                <ul>
+                  <li>Member</li>
+                  <li>Member</li>
+                </ul>
+                <h2>Add a Member</h2>
+                <form method="POST" action="group/add">
+                  <div class="form-group">
+                    <div class="input-group">
+        	            <input type="text" class="form-control" id="fname" placeholder="First Name" name="fname">
+        							<input type="text" class="form-control" id="lname" placeholder="Last Name" name="lname">
+        	          </div>
+                  </div>
+        					<div class="login-buttons">
+        	          <button type="submit" class="btn meow">Add</button>
+        					</div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block script %}
-<script>
-  $(function () {
-    $('[data-toggle="popover"]').popover({ trigger: "hover" });
-  })
-</script>
-<!-- <script>
-  document.getElementById("submit-form").addEventListener('submit', function(e) {
-    e.preventDefault();
-    var text = document.getElementById("submit-text").value;
-		console.log('hi');
-    if (text.length > 280) {
-      alert("Posts cannot be longer than 280 characters");
-      return;
-    }
-
-    if (text.length == 0) {
-      return;
-    }
-
-    this.submit();
-  });
-
-  document.getElementById("submit-form-modal").addEventListener('submit', function(e) {
-    e.preventDefault();
-    var text = document.getElementById("submit-text-modal").value;
-    if (text.length > 280){
-      alert("Posts cannot be longer than 280 characters");
-      return;
-    }
-
-    if (text.length == 0) {
-      return;
-    }
-
-    this.submit();
-  });
-
-</script> -->
-
+<script src={{ url_for('static', filename='js/script.js') }}></script>
 {% endblock %}

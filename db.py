@@ -25,7 +25,7 @@ def login_user(email, password):
 
 def register_user(email, password, fname, lname):
     if len(email) > 20 or len(fname) > 20 or len(lname) > 20:
-        return False, "All field lengths must be less than 20 characters"
+        return False, 'All field lengths must be less than 20 characters'
 
     cursor = conn.cursor()
     query = 'SELECT * FROM Person WHERE email = %s'
@@ -46,9 +46,9 @@ def register_user(email, password, fname, lname):
 
 def get_public_content():
     cursor = conn.cursor()
-    query = ('SELECT item_id, email_post, post_time, file_path, item_name ' +
-             'FROM ContentItem WHERE is_pub = TRUE AND post_time >= now() - ' +
-             'INTERVAL 1 DAY')
+    query = ('SELECT item_id, email_post, post_time, file_path, item_name '
+             'FROM ContentItem WHERE is_pub = TRUE AND post_time >= now() - '
+             'INTERVAL 1 DAY ORDER BY post_time DESC')
     cursor.execute(query)
     posts = cursor.fetchall()
     cursor.close()
@@ -57,7 +57,7 @@ def get_public_content():
 
 def post_content(email_post, item_name, file_path, is_pub):
     cursor = conn.cursor()
-    query = ('INSERT INTO ContentItem (email_post, post_time, file_path, ' +
+    query = ('INSERT INTO ContentItem (email_post, post_time, file_path, '
              'item_name, is_pub) values (%s, NOW(), %s, %s, %s)')
     cursor.execute(query, (email_post, file_path, item_name, is_pub))
     conn.commit()
@@ -67,20 +67,35 @@ def post_content(email_post, item_name, file_path, is_pub):
 
 def get_my_content(email):
     cursor = conn.cursor()
-    query = ('SELECT * FROM ContentItem WHERE item_id IN ' +
-             '(SELECT item_id FROM Share INNER JOIN Belong ON ' +
-             'Belong.fg_name=Share.fg_name AND ' +
-             'Belong.owner_email=Share.owner_email AND Belong.email=%s) ' +
-             'OR is_pub')
+    query = ('SELECT * FROM ContentItem WHERE item_id IN '
+             '(SELECT item_id FROM Share INNER JOIN Belong ON '
+             'Belong.fg_name=Share.fg_name AND '
+             'Belong.owner_email=Share.owner_email AND Belong.email=%s) '
+             'OR is_pub ORDER BY post_time DESC')
     cursor.execute(query, (email))
     content = cursor.fetchall()
     cursor.close()
     return True, content
 
 
+def get_content(email, item_id):
+    cursor = conn.cursor()
+    query = ('SELECT * FROM ContentItem WHERE item_id IN '
+             '(SELECT item_id FROM Share INNER JOIN Belong ON '
+             'Belong.fg_name=Share.fg_name AND '
+             'Belong.owner_email=Share.owner_email AND Belong.email=%s) '
+             'OR is_pub AND item_id=%s')
+    cursor.execute(query, (email, item_id))
+    content = cursor.fetchall()
+    cursor.close()
+    if not content:
+        return False, 'Item not visible or does not exist'
+    return True, content[0]
+
+
 def create_friend_group(owner_email, fg_name, description):
     cursor = conn.cursor()
-    query = ('INSERT INTO Friendgroup' +
+    query = ('INSERT INTO Friendgroup'
              '(owner_email, fg_name, description) values (%s, %s, %s)')
     cursor.execute(query, (owner_email, fg_name, description))
     conn.commit()
@@ -90,8 +105,9 @@ def create_friend_group(owner_email, fg_name, description):
 
 def get_my_friend_groups(email):
     cursor = conn.cursor()
-    query = ('SELECT fg_name FROM Friendgroup WHERE owner_email=%s UNION ' +
-             'SELECT fg_name FROM Belong WHERE email=%s')
+    query = ('SELECT fg_name, owner_email FROM Friendgroup WHERE '
+             'owner_email=%s UNION SELECT fg_name, owner_email '
+             'FROM Belong WHERE email=%s')
     cursor.execute(query, (email, email))
     content = cursor.fetchall()
     cursor.close()
@@ -100,10 +116,10 @@ def get_my_friend_groups(email):
 
 def get_my_content_ids(email):
     cursor = conn.cursor()
-    query = ('SELECT item_id FROM ContentItem WHERE' +
-             'item_id IN (SELECT item_id FROM Share INNER JOIN Belong ON' +
-             'Belong.fg_name=Share.fg_name AND' +
-             'Belong.owner_email=Share.owner_email AND Belong.email=%s))' +
+    query = ('SELECT item_id FROM ContentItem WHERE'
+             'item_id IN (SELECT item_id FROM Share INNER JOIN Belong ON'
+             'Belong.fg_name=Share.fg_name AND'
+             'Belong.owner_email=Share.owner_email AND Belong.email=%s))'
              'OR is_pub')
 
     cursor.execute(query, (email, ))
@@ -119,8 +135,8 @@ def tag_content_item(email_tagged, email_tagger, item_id, status):
     if not visibility:
         return None, 'ContentItem is not accessible to the current tagger'
 
-    query = ('INSERT INTO Tag' +
-             '(email_tagged, email_tagger, item_id, status, tagtime)' +
+    query = ('INSERT INTO Tag'
+             '(email_tagged, email_tagger, item_id, status, tagtime)'
              'values (%s, %s, %s, %s, NOW())')
     cursor = conn.cursor()
     cursor.execute(query, (email_tagged, email_tagger, item_id, status))
@@ -131,7 +147,7 @@ def tag_content_item(email_tagged, email_tagger, item_id, status):
 
 def add_friend(email, owner_email, fg_name):
     cursor = conn.cursor()
-    query = ('INSERT into Belong (email, owner_email, fg_name)' +
+    query = ('INSERT into Belong (email, owner_email, fg_name)'
              'VALUES (%s, %s, %s)')
     cursor.execute(query, (email, owner_email, fg_name))
     # TODO: err check here to see if primary key collisions?
