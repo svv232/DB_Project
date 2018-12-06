@@ -61,11 +61,21 @@
                 <div class="submission-profile"><i class="fas fa-user"></i></div>
               </div>
               <div class="submission-col col-sm-11">
+                <input id="submit-title" placeholder="Title" name="submission-title" class="submission-title" form="submit-form"></input>
                 <textarea id="submit-text" placeholder="meow meow meow meow?" name="submission-text" class="submission-text" form="submit-form"></textarea>
               </div>
             </div>
           </div>
+          <div class="dropdown">
+            <button type="button" id="submissionPrivacy" class="btn submission-link" aria-haspopup="true" aria-expanded="false"><i class="fas fa-ghost"></i></button>
+            <div id="privacyMenu" class="dropdown-menu" aria-labelledby="submissionPrivacy">
+              {% for group in groups %}
+                <a class="dropdown-item privacyGroup" href="#">{{ group.fg_name }}</a>
+              {% endfor %}
+            </div>
+          </div>
           <form id="submit-form" action="post" method="POST">
+            <input id="submissionPrivacyForm" type="hidden" value="False" name="private">
             <button type="submit" class="meow btn submission-button">Meow</button>
           </form>
         </div>

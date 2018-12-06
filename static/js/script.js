@@ -114,3 +114,16 @@ $('.modal').on('shown.bs.modal', function (e) {
 $('.modal').on('hidden.bs.modal', function (e) {
     modal_lv--
 });
+
+document.getElementById('submissionPrivacy').addEventListener('click', function(e) {
+  e.preventDefault();
+  if (this.classList.contains("submission-on")) {
+    this.classList.remove("submission-on");
+    document.getElementById('submissionPrivacyForm').value = 'False';
+    $('#privacyMenu').toggle();
+  } else {
+    this.classList.add("submission-on");
+    document.getElementById('submissionPrivacyForm').value = 'True';
+    $('#privacyMenu').toggle()
+  }
+});

@@ -81,8 +81,14 @@ def logout():
 @login_required
 def post():
     email = session['email']
+    title = request.form.get('submission-title')
     post = request.form.get('submission-text')
-    post_content(email, 'test', post, True)
+    private = request.form.get('private')
+    if private == 'True':
+        private = True
+    elif private == 'False':
+        private = False
+    post_content(email, title, post, not private)
     return redirect('/')
 
 
