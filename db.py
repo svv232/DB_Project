@@ -112,6 +112,19 @@ def get_my_content_ids(email):
     cursor.close()
     return content, 'Successfully Got Content!'
 
+def count_tags(item_id):
+    pass
+
+def get_friend_group_by_primkey(fg_name, email):
+    cursor = conn.cursor()
+    query = ("SELECT fg_name, email FROM Friendgroup where "+
+            "owner_email=%s AND fg_name=%s")
+    cursor.execute(query, (email, fg_name))
+    content = cursor.fetchall()
+    cursor.close()
+    return content, "Successfully found friendgroup from primary keys"
+
+
 def remove_tag_on_content_item(email_tagged, email_tagger, item_id):
     cursor = conn.cursor()
     query = ("DELETE FROM Tag WHERE email_tagged=%s " +
@@ -139,7 +152,7 @@ def tag_content_item(email_tagged, email_tagger, item_id):
     cursor.execute(query, (email_tagged, email_tagger, item_id, status))
     content = cursor.fetchall()
     cursor.close()
-    return content, 'Successfully Created FriendGroup'
+    return content, 'Successfully tagged ContentItem'
 
 
 def add_friend(email, owner_email, fg_name):
