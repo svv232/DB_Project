@@ -67,12 +67,14 @@ def post_content(email_post, item_name, file_path, is_pub):
 
 def get_my_content(email):
     cursor = conn.cursor()
-    query = ('SELECT * FROM ContentItem WHERE item_id IN '
+    query = ('SELECT DISTINCT * FROM ContentItem WHERE item_id IN '
              '(SELECT item_id FROM Share INNER JOIN Belong ON '
              'Belong.fg_name=Share.fg_name AND '
              'Belong.owner_email=Share.owner_email AND Belong.email=%s) '
-             'OR is_pub ORDER BY post_time DESC')
-    cursor.execute(query, (email))
+             'OR is_pub ORDER BY post_time DESC'
+             'UNION'
+             '(SELECT itemd_id FROM ContentItem WHERE email_post=%s)')
+    cursor.execute(query, (email, email))
     content = cursor.fetchall()
     cursor.close()
     return True, content
@@ -276,6 +278,15 @@ def filter_by_group(email, fg_name):
     content = cursor.fetchall()
     cursor.close()
     return True, content
+
+def share_with_group(email, fg_name, item_id):
+    cursor = conn.cursor()
+    insert = ('INSERT INTO Share VALUES ((SELECT owner_email from Belong WHERE email=%s), %s, %s)')
+    cursor.execute(insert, (email, fg_name, item_id))
+    cursor.commit()
+    cursor.close()
+    return True, "Success"
+
 
 # def get_pending_tag(user, action):
 #     cursor = conn.cursor()
