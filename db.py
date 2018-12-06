@@ -153,6 +153,14 @@ def get_friend_group_by_primkey(fg_name, email):
     cursor.close()
     return content, "Successfully found friendgroup from primary keys"
 
+def accept_tag_on_content_item(email_tagged, email_tagger, item_id):
+    cursor = conn.cursor()
+    query = ("UPDATE Tag SET status=TRUE WHERE email_tagged=%s AND" 
+            "email_tagger=%s AND item_id=%s")
+    query.execute(query,(email_tagged, email_tagger, item_id))
+    cursor.close()
+    return True, "Successfully updated tag on content item"
+
 
 def remove_tag_on_content_item(email_tagged, email_tagger, item_id):
     cursor = conn.cursor()
