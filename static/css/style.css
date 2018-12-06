@@ -11,6 +11,16 @@ body, input {
   box-shadow: none !important;
 }
 
+.form-control:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 #nav-contain {
   font-weight: bold;
   font-size: 13px;
@@ -519,4 +529,36 @@ body, input {
 
 #postModal .post-user {
   font-size: 15px;
+}
+
+.friend-container h1 {
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+.friend-container input {
+  height: calc(2rem);
+}
+
+.friend-container .form-group {
+  margin-bottom: 8px;
+}
+
+.friend-container textarea:focus {
+  border-color: #80bdff;
+}
+
+.friend-container textarea {
+  font-size: 1rem;
+  resize: none;
+  height: 70px;
+  width: 100%;
+  border-radius: .25rem;
+  border: 1px solid #ced4da;
+  padding: 10px;
+  margin-bottom: 7px;
+}
+
+.close {
+margin-top: -5px;
 }

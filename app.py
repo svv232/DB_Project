@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, session, url_for, redirect
 from db import login_user, register_user, get_public_content, post_content
+from db import create_friend_group, get_my_content, get_my_friend_groups
 from utilities import login_required
 
 import os
@@ -9,14 +10,15 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    _, posts = get_public_content()
-
     if 'email' not in session:
+        _, posts = get_public_content()
         return render_template('index.html', posts=posts)
 
+    _, posts = get_my_content(session['email'])
+    _, groups = get_my_friend_groups(session['email'])
     return render_template('index.html', email=session['email'],
                            fname=session['fname'], lname=session['lname'],
-                           posts=posts)
+                           posts=posts, groups=groups)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -80,22 +82,30 @@ def post():
 
 @app.route('/posts')
 def get_posts():
-    # Optional Feature 7 (Person 1)
-    # Optional Feature 8 (Person 1)
-    # Modify
-    # Return Value: Posts in a list in the correct filtered order
+    # Optional Feature 7 (Sai)
+    # Optional Feature 8 (Sai)
     # Filtering stuff
+    # Modify get_my_content in db.py
+    # Return Value: Posts in a list in the correct filtered order
     pass
 
 
 def rate():
     # Optional Feature 1 (Person 2)
+    # Modify db.py
+    # Idk add rating
+    # Return Value: Success or Error Message
+    # i.e. (True, 'Success') or (False, 'Post does not exist')
     pass
 
 
 def tag():
-    # Required Feature 6
+    # Required Feature 6 (tag person)
     # Optional Feature 4 (tag group) (Person 2)
+    # Modify db.py
+    # Idk add tagging groups
+    # Return Value: Success or Error Message
+    # i.e. (True, 'Success') or (False, 'Post does not exist')
     pass
 
 
@@ -109,9 +119,13 @@ def comment():
     pass
 
 
+@app.route('/group/create', methods=['POST'])
+@login_required
 def create_group():
-    # Required Feature 7
-    pass
+    fg_name = request.form['fg_name']
+    desc = request.form['fg_description']
+    success, message = create_friend_group(session['email'], fg_name, desc)
+    return redirect('/')
 
 
 def invite_group():
