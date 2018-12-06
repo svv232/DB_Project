@@ -128,16 +128,33 @@ def get_my_content_ids(email):
     cursor.close()
     return content, 'Successfully Got Content!'
 
+def remove_tag_on_content_item(email_tagged, email_tagger, item_id):
+    cursor = conn.cursor()
+    query = ("DELETE FROM Tag WHERE email_tagged=%s " +
+            "AND email_tagger=%s AND item_id=%s")
+    query.execute(query, (email_tagged, email_tagger, item_id))
+    cursor.close()
+    return True, "Successfully deleted content item"
 
-def tag_content_item(email_tagged, email_tagger, item_id, status):
+
+def tag_content_item(email_tagged, email_tagger, item_id):
     my_ids, _ = get_my_content_ids(email_tagger)
     visibility = (item_id,) in get_my_content_ids(item_id)
     if not visibility:
         return None, 'ContentItem is not accessible to the current tagger'
+    if email_tagged == email_tagger:
+        query = ('INSERT INTO Tag' +
+                 '(email_tagged, email_tagger, item_id, status, tagtime)' +
+                 'values (%s, %s, %s, TRUE, NOW())')
+    else:
+        query = ('insert into tag' +
+                '(email_tagged, email_tagger, item_id, status, tagtime) ' +
+                'values (%s, %s, %s, FALSE, NOW())')
 
     query = ('INSERT INTO Tag'
              '(email_tagged, email_tagger, item_id, status, tagtime)'
              'values (%s, %s, %s, %s, NOW())')
+
     cursor = conn.cursor()
     cursor.execute(query, (email_tagged, email_tagger, item_id, status))
     content = cursor.fetchall()
@@ -155,6 +172,29 @@ def add_friend(email, owner_email, fg_name):
     cursor.close()
     return True, 'Successfully added user to friend group'
 
+def filter_by_date(email, timestamp):
+    cursor = conn.cursor()
+    query = ('SELECT * FROM ContentItem WHERE item_id IN ' +
+             '(SELECT item_id FROM Share INNER JOIN Belong ON ' +
+             'Belong.fg_name=Share.fg_name AND ' +
+             'Belong.owner_email=Share.owner_email AND Belong.email=%s) ' +
+             'OR is_pub AND post_time=%s')
+    cursor.execute(query, (email, timestamp))
+    content = cursor.fetchall()
+    cursor.close()
+    return True, content
+
+def filter_by_group(email, fg_name):
+    cursor = conn.cursor()
+    query = ('SELECT * FROM ContentItem WHERE item_id IN ' +
+             '(SELECT item_id FROM Share INNER JOIN Belong ON ' +
+             'Belong.fg_name=Share.fg_name AND ' +
+             'Belong.owner_email=Share.owner_email AND Belong.email=%s '
+             'AND fg_name=%s;')
+    cursor.execute(query, (email, fg_name))
+    content = cursor.fetchall()
+    cursor.close()
+    return True, content
 
 # def get_pending_tag(user, action):
 #     cursor = conn.cursor()
