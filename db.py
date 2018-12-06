@@ -277,6 +277,15 @@ def filter_by_group(email, fg_name):
     cursor.close()
     return True, content
 
+def share_with_group(email, fg_name, item_id):
+    cursor = conn.cursor()
+    insert = ('INSERT INTO Share VALUES ((SELECT owner_email from Belong WHERE email=%s), %s, %s)')
+    cursor.execute(insert, (email, fg_name, item_id))
+    cursor.commit()
+    cursor.close()
+    return True, "Success"
+
+
 # def get_pending_tag(user, action):
 #     cursor = conn.cursor()
 #     message = f'{action} for tag was successfully done!!'#     if action == 'accept':
