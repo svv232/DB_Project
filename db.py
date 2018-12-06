@@ -328,7 +328,7 @@ def count_ratings_on_content(item_id):
 def add_rating(rater_email, item_id, emoji):
     cursor = conn.cursor()
     query = ('INSERT INTO Rate VALUES(%s, %s, NOW(), %s)')
-    cursor.execute(query, (rater_email, item_id, emoji)
+    cursor.execute(query, (rater_email, item_id, emoji))
     conn.commit()
     cursor.close()
     return True, "Success"
