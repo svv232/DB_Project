@@ -317,9 +317,24 @@ def share_with_group(email, fg_name, item_id):
 #     return users
 
 
+def count_ratings_on_content(item_id):
+    cursor = conn.cursor()
+    query = ('SELECT count(item_id) FROM Rate WHERE ID = %s GROUP BY item_id')
+    cursor.execute(query, (item_id))
+    content = cursor.fetchall()
+    cursor.close()
+    return content, f"found rating number for item_id {item_id}"
+
+def add_rating(rater_email, item_id, emoji):
+    cursor = conn.cursor()
+    query = ('INSERT INTO Rate VALUES(%s, %s, NOW(), %s)')
+    cursor.execute(query, (rater_email, item_id, emoji)
+    cursor.commit()
+    cursor.close()
+    return True, "Success"
+
 def add_comment(commenter_email, item_id):
     pass
-
 
 def get_comments(item_id):
     pass
