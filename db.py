@@ -200,6 +200,35 @@ def tag_content_item(email_tagged, email_tagger, item_id):
     return content, 'Successfully tagged ContentItem'
 
 
+def add_friend(fname, lname, email, owner_email, fg_name):
+    cursor = conn.cursor()
+    query = ('SELECT fg_name FROM Friendgroup WHERE owner_email=%s')
+    cursor.execute(query, (owner_email))
+    content = cursor.fetchall()
+    if not ((owner_email,) in content):
+        return False, "You can only insert in groups you own"
+
+    query = ('SELECT email FROM Person WHERE email=%s' )
+    cursor.execute(query, (email))
+
+    content = cursor.fetchall()
+    if not len(content):
+        return False, "A Person with this email does not exist"
+    
+    query = ("SELECT * from Belong WHERE email=%s AND owner_email=%s "
+            "AND fg_name=%s")
+    cursor.execute(query, (email, owner_email, fg_name))
+    content = cursor.fetchall()
+    if len(content):
+        return False, "This Person is already in this friend group"
+
+    query = ('INSERT into Belong (email, owner_email, fg_name) '
+             'VALUES (%s, %s, %s)')
+
+    cursor.execute(query, (email, owner_email, fg_name))
+    cursor.close()
+    return True, 'Successfully added user to friend group'
+
 def get_my_tags(email):
     cursor = conn.cursor()
     query = ('SELECT * FROM TAG WHERE email_tagged=%s AND status=FALSE')
@@ -207,18 +236,6 @@ def get_my_tags(email):
     content = cursor.fetchall()
     cursor.close()
     return True, content
-
-
-def add_friend(email, owner_email, fg_name):
-    cursor = conn.cursor()
-    query = ('INSERT INTO Belong (email, owner_email, fg_name)'
-             'VALUES (%s, %s, %s)')
-    cursor.execute(query, (email, owner_email, fg_name))
-    # TODO: err check here to see if primary key collisions?
-    # if true rollback to prev state
-    cursor.close()
-    return True, 'Successfully added user to friend group'
-
 
 def filter_by_date(email, timestamp):
     cursor = conn.cursor()
@@ -245,7 +262,33 @@ def filter_by_group(email, fg_name):
     cursor.close()
     return True, content
 
+# def get_pending_tag(user, action):
+#     cursor = conn.cursor()
+#     message = f'{action} for tag was successfully done!!'#     if action == 'accept':
+#         status, query = (''),
+#     elif action == 'decline':
+#         status, query = (''),
+#     elif action == 'remove':
+#         status, query = ('')
+#     else:
+#         message = 'An action was not decided'
+#         status, query = ('')
+#
+#     cursor.execute(query)
+#     tag = cursor.fetchall()
+#     cursor.close()
+#     return status, tag
 
+
+
+# def get_users(email):
+#     cursor = conn.cursor()
+#     query = 'SELECT DISTINCT email FROM blog'
+#     cursor.execute(query)
+#     users = cursor.fetchall()
+#     cursor.close()
+#
+#     return users
 def add_comment(commenter_email, item_id):
     pass
 
