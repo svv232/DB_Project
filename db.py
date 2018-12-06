@@ -35,9 +35,9 @@ def register_user(email, password, fname, lname):
     if data:
         return False, 'User already exists'
 
-    insert = 'INSERT INTO Person VALUES(%s, %s, %s, %s)'
+    INSERT = 'INSERT INTO Person VALUES(%s, %s, %s, %s)'
     password = sha256(password.encode('utf-8')).hexdigest()
-    cursor.execute(insert, (email, password, fname, lname))
+    cursor.execute(INSERT, (email, password, fname, lname))
     conn.commit()
     cursor.close()
 
@@ -58,7 +58,7 @@ def get_public_content():
 def post_content(email_post, item_name, file_path, is_pub):
     cursor = conn.cursor()
     query = ('INSERT INTO ContentItem (email_post, post_time, file_path, '
-             'item_name, is_pub) values (%s, NOW(), %s, %s, %s)')
+             'item_name, is_pub) VALUES (%s, NOW(), %s, %s, %s)')
     cursor.execute(query, (email_post, file_path, item_name, is_pub))
     conn.commit()
     cursor.close()
@@ -96,7 +96,7 @@ def get_content(email, item_id):
 def create_friend_group(owner_email, fg_name, description):
     cursor = conn.cursor()
     query = ('INSERT INTO Friendgroup'
-             '(owner_email, fg_name, description) values (%s, %s, %s)')
+             '(owner_email, fg_name, description) VALUES (%s, %s, %s)')
     cursor.execute(query, (owner_email, fg_name, description))
     conn.commit()
     cursor.close()
@@ -128,43 +128,55 @@ def get_my_content_ids(email):
     cursor.close()
     return content, 'Successfully Got Content!'
 
+
 def remove_tag_on_content_item(email_tagged, email_tagger, item_id):
     cursor = conn.cursor()
-    query = ("DELETE FROM Tag WHERE email_tagged=%s " +
-            "AND email_tagger=%s AND item_id=%s")
+    query = ('DELETE FROM Tag WHERE email_tagged=%s '
+             'AND email_tagger=%s AND item_id=%s')
     query.execute(query, (email_tagged, email_tagger, item_id))
     cursor.close()
-    return True, "Successfully deleted content item"
+    return True, 'Successfully deleted content item'
+
+
+def accept_tag_on_content_item(email_tagged, email_tagger, item_id):
+    pass
 
 
 def tag_content_item(email_tagged, email_tagger, item_id):
     my_ids, _ = get_my_content_ids(email_tagger)
     visibility = (item_id,) in get_my_content_ids(item_id)
+
     if not visibility:
         return None, 'ContentItem is not accessible to the current tagger'
-    if email_tagged == email_tagger:
-        query = ('INSERT INTO Tag' +
-                 '(email_tagged, email_tagger, item_id, status, tagtime)' +
-                 'values (%s, %s, %s, TRUE, NOW())')
-    else:
-        query = ('insert into tag' +
-                '(email_tagged, email_tagger, item_id, status, tagtime) ' +
-                'values (%s, %s, %s, FALSE, NOW())')
 
-    query = ('INSERT INTO Tag'
-             '(email_tagged, email_tagger, item_id, status, tagtime)'
-             'values (%s, %s, %s, %s, NOW())')
+    if email_tagged == email_tagger:
+        query = ('INSERT INTO Tag'
+                 '(email_tagged, email_tagger, item_id, status, tagtime)'
+                 'VALUES (%s, %s, %s, TRUE, NOW())')
+    else:
+        query = ('INSERT INTO tag'
+                 '(email_tagged, email_tagger, item_id, status, tagtime) '
+                 'VALUES (%s, %s, %s, FALSE, NOW())')
 
     cursor = conn.cursor()
-    cursor.execute(query, (email_tagged, email_tagger, item_id, status))
+    cursor.execute(query, (email_tagged, email_tagger, item_id))
     content = cursor.fetchall()
     cursor.close()
     return content, 'Successfully Created FriendGroup'
 
 
+def get_my_tags(email):
+    cursor = conn.cursor()
+    query = ('SELECT * FROM TAG WHERE email_tagged=%s AND status=FALSE')
+    cursor.execute(query, (email))
+    content = cursor.fetchall()
+    cursor.close()
+    return True, content
+
+
 def add_friend(email, owner_email, fg_name):
     cursor = conn.cursor()
-    query = ('INSERT into Belong (email, owner_email, fg_name)'
+    query = ('INSERT INTO Belong (email, owner_email, fg_name)'
              'VALUES (%s, %s, %s)')
     cursor.execute(query, (email, owner_email, fg_name))
     # TODO: err check here to see if primary key collisions?
@@ -172,55 +184,40 @@ def add_friend(email, owner_email, fg_name):
     cursor.close()
     return True, 'Successfully added user to friend group'
 
+
 def filter_by_date(email, timestamp):
     cursor = conn.cursor()
-    query = ('SELECT * FROM ContentItem WHERE item_id IN ' +
-             '(SELECT item_id FROM Share INNER JOIN Belong ON ' +
-             'Belong.fg_name=Share.fg_name AND ' +
-             'Belong.owner_email=Share.owner_email AND Belong.email=%s) ' +
+    query = ('SELECT * FROM ContentItem WHERE item_id IN '
+             '(SELECT item_id FROM Share INNER JOIN Belong ON '
+             'Belong.fg_name=Share.fg_name AND '
+             'Belong.owner_email=Share.owner_email AND Belong.email=%s) '
              'OR is_pub AND post_time=%s')
     cursor.execute(query, (email, timestamp))
     content = cursor.fetchall()
     cursor.close()
     return True, content
 
+
 def filter_by_group(email, fg_name):
     cursor = conn.cursor()
-    query = ('SELECT * FROM ContentItem WHERE item_id IN ' +
-             '(SELECT item_id FROM Share INNER JOIN Belong ON ' +
-             'Belong.fg_name=Share.fg_name AND ' +
+    query = ('SELECT * FROM ContentItem WHERE item_id IN '
+             '(SELECT item_id FROM Share INNER JOIN Belong ON '
+             'Belong.fg_name=Share.fg_name AND '
              'Belong.owner_email=Share.owner_email AND Belong.email=%s '
-             'AND fg_name=%s;')
+             'AND fg_name=%s)')
     cursor.execute(query, (email, fg_name))
     content = cursor.fetchall()
     cursor.close()
     return True, content
 
-# def get_pending_tag(user, action):
-#     cursor = conn.cursor()
-#     message = f'{action} for tag was successfully done!!'
-#     if action == 'accept':
-#         status, query = (''),
-#     elif action == 'decline':
-#         status, query = (''),
-#     elif action == 'remove':
-#         status, query = ('')
-#     else:
-#         message = 'An action was not decided'
-#         status, query = ('')
-#
-#     cursor.execute(query)
-#     tag = cursor.fetchall()
-#     cursor.close()
-#     return status, tag
+
+def add_comment(commenter_email, item_id):
+    pass
 
 
+def get_comments(item_id):
+    pass
 
-# def get_users(email):
-#     cursor = conn.cursor()
-#     query = 'SELECT DISTINCT email FROM blog'
-#     cursor.execute(query)
-#     users = cursor.fetchall()
-#     cursor.close()
-#
-#     return users
+
+def get_friend_group():
+    pass

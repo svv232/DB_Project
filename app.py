@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request, session, url_for, redirect
 from db import login_user, register_user, get_public_content, post_content
 from db import create_friend_group, get_my_content, get_my_friend_groups
-from db import get_content
+from db import get_content, get_friend_group, add_friend, get_my_tags
+from db import tag_content_item, remove_tag_on_content_item
+from db import accept_tag_on_content_item
 from utilities import login_required
 
 import os
@@ -18,9 +20,10 @@ def index():
 
     _, posts = get_my_content(session['email'])
     _, groups = get_my_friend_groups(session['email'])
+    _, tags = get_my_tags(session['email'])
     return render_template('index.html', email=session['email'],
                            fname=session['fname'], lname=session['lname'],
-                           posts=posts, groups=groups)
+                           posts=posts, groups=groups, tags=tags)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -104,25 +107,40 @@ def get_posts():
 def rate():
     # Optional Feature 1 (Person 2)
     # Modify db.py
-    # Idk add rating
+    # Idk add rating also would like query to get number of rates by item_id
     # Return Value: Success or Error Message
     # i.e. (True, 'Success') or (False, 'Post does not exist')
     pass
 
 
+@app.route('/tag')
+@login_required
 def tag():
-    # Required Feature 6 (tag person)
+    item_id = request.args['item_id']
+    email_tagged = request.args['email_tagged']
+    tag_content_item(email_tagged, session['email'], item_id)
     # Optional Feature 4 (tag group) (Person 2)
     # Modify db.py
     # Idk add tagging groups
     # Return Value: Success or Error Message
     # i.e. (True, 'Success') or (False, 'Post does not exist')
-    pass
+    return redirect('/')
 
 
+@app.route('/tag/review')
+@login_required
 def accept_tag():
-    # Required Feature 4
-    pass
+    item_id = request.args['item_id']
+    email_tagger = request.args['email_tagger']
+    status = request.args['status']
+
+    if status == 'delete':
+        remove_tag_on_content_item(session['email'], email_tagger, item_id)
+
+    if status == 'accept':
+        accept_tag_on_content_item(session['email'], email_tagger, item_id)
+
+    return redirect('/')
 
 
 def comment():
@@ -139,15 +157,31 @@ def create_group():
     return redirect('/')
 
 
+@app.route('/group/get', methods=['POST'])
+@login_required
+def get_group():
+    fg_name = request.get_json().get('fg_name')
+    owner_email = request.get_json().get('owner_email')
+    _, content = get_friend_group(session['email'], fg_name, owner_email)
+    return json.dumps(content)
+
+
+@app.route('/group/invite', methods=['POST'])
+@login_required
 def invite_group():
-    # Required Feature 7
-    pass
+    fg_name = request.form['fg_name']
+    owner_email = request.form['owner_email']
+    fname = request.form['fname']
+    lname = request.form['lname']
+    add_friend(fname, lname, owner_email, fg_name)
+    return redirect('/')
 
 
 @app.route('/group/leave', methods=['POST'])
 @login_required
 def leave_group():
-    group = request.form['group']
+    fg_name = request.form['fg_name']
+    owner_email = request.form['owner_email']
     # Optional Feature 3 (Person 4)
     # Remove from Belongs Table
     # Modify db.py
@@ -159,7 +193,8 @@ def leave_group():
 @app.route('/group/best', methods=['POST'])
 @login_required
 def best_group():
-    group = request.form['group']
+    fg_name = request.form['fg_name']
+    owner_email = request.form['owner_email']
     # Optional Feature 6 (Person 5)
     # Probably new table (but you can implement however you want)
     # Add group to best friends table
@@ -184,9 +219,6 @@ def edit_profile():
     # i.e. (True, 'Success') or (False, 'Email already exists')
     pass
 
-
-# Done:
-# Required Features: 1, 2, 3, 5
 
 @app.errorhandler(404)
 def page_not_found(e):
