@@ -144,7 +144,9 @@ def rate():
 @login_required
 def ratings():
     item_id = request.get_json().get('item_id')
-    _, content = ratings_on_content(item_id, session['email'])
+    _, content = ratings_on_content(session['email'], item_id)
+    for rate in content:
+        rate['rate_time'] = str(rate['rate_time'])
     return json.dumps(content)
 
 

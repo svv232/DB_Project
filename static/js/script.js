@@ -49,12 +49,28 @@ Array.from(posts).forEach(function(element) {
         }).then(function(response) {
           return response.json();
         })
-        .then(function(content) {
+        .then(content => {
           document.getElementById('postComments').innerHTML = ''
           for (comment in content) {
             document.getElementById('postComments').innerHTML += "<li><div class='post-info'><span class='post-user'>" + content[comment]['commenter_email'] + "</span></div><p>" + content[comment]['comment'] + "</p></li>"
           }
-          $('#postModal').modal('show');
+          fetch('http://localhost:5000/rate/get', {
+            method: 'POST',
+            body: JSON.stringify({item_id: this.getAttribute('post-id')}),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }).then(function(response) {
+            return response.json();
+          })
+          .then(function(content) {
+            document.getElementById('postRate').innerHTML = content.length + '<span> Rate</span>';
+            document.getElementById('rateList').innerHTML = '';
+            for (rate in content) {
+              document.getElementById('rateList').innerHTML += "<li><span class='font-weight-bold'>" + content[rate]['email'] + ": </span><span>" + content[rate]['emoji'] + "</span></li>"
+            }
+            $('#postModal').modal('show');
+          });
         });
       });
     });
@@ -108,11 +124,7 @@ Array.from(tags).forEach(function(element) {
           return response.json();
         })
         .then(function(content) {
-          document.getElementById('postTag').innerHTML = content.length + '<span> Tags</span>';
-          document.getElementById('taggedEmails').innerHTML = '';
-          for (tagged in content) {
-            document.getElementById('taggedEmails').innerHTML += '<li><span>' + content[tagged]['email_tagger'] + '</span><span>tagged</span><span>' + content[tagged]['email_tagged'] + '</li>'
-          }
+          console.log(content);
           $('#postModal').modal('show');
         });
       });
@@ -161,8 +173,7 @@ Array.from(groups).forEach(function(element) {
             document.getElementById('groupFriendMembers').innerHTML += '<li>' + content[member]['email'] + '</li>'
           }
         } else {
-
-        document.getElementById('groupFriendMembers').innerHTML = '<li>No members 😥</li>';
+          document.getElementById('groupFriendMembers').innerHTML = '<li>No members 😥</li>';
         }
         $('#groupModal').modal('show');
       });
