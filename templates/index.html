@@ -231,9 +231,9 @@
                   <div class="post-actions">
                     <div class="dropdown">
                       <button id="tagButton" type="button" class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span data-toggle="popover" data-placement="top" data-content="Tag" data-container="body"><i class="far fa-hand-peace"></i></span></button>
-                      <form class="dropdown-menu tag-menu" aria-labelledby="tagButton" action="tag">
+                      <form class="dropdown-menu tag-menu" aria-labelledby="tagButton" action="tag" method="POST">
                         <div class="form-group">
-                          <input id="tagId" type="hidden" value="">
+                          <input id="tagId" type="hidden" value="" name="item_id">
                           <input type="email" class="form-control" placeholder="Tag Email" name="tagged-email">
                           <button type="submit" class="btn">Tag</button>
                         </div>
