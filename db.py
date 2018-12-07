@@ -208,7 +208,21 @@ def tag_group_members(owner_email, fg_name, email_tagger, item_id):
       insert = ('INSERT INTO Tag '
                 '(email_tagged, email_tagger, item_id, status, tagtime) '
                 'VALUES(%s, %s, %s, FALSE, NOW())')
-  cursor.execute(insert, (member, email_tagger, item_id))
+      cursor.execute(insert, (member, email_tagger, item_id))
+  cursor.close()
+  return True, "Success"
+
+
+def check_tagged_group_post_visibility(owner_email, fg_name, item_id):
+    query = ('SELECT email, status FROM Belong WHERE fg_name=%s AND owner_email=%s')
+    cursor = conn.cursor()
+    cursor.execute(query, (fg_name, owner_email))
+    members = cursor.fetchall()
+    group_visibility = True
+    for member in members:
+        group_visibility = group_visibility && member[0][1]
+    cursor.close()
+    return group_visibility
 
 
 def tag_content_item(email_tagged, email_tagger, item_id):
