@@ -160,6 +160,15 @@ def get_friend_group(email, fg_name, owner):
     print(content)
     return True, content[0]
 
+def get_emails_false_tags(email_tagged):
+    cursor = conn.cursor()
+    query = ("SELECT email_tagged from Tag WHERE status=FALSE " 
+            "AND email_tagged=%s")
+    cursor.execute(query, email_tagged)
+    content = cursor.fetchall()
+    cursor.close()
+    return True, f"Successfully got tags where email_tagged {email_tagged}"
+
 
 def get_friend_group_members(email, owner, fg_name):
     cursor = conn.cursor()
