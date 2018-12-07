@@ -162,6 +162,11 @@ def tag():
     # Return Value: Success or Error Message
     # i.e. (True, 'Success') or (False, 'Post does not exist')
     return redirect('/')
+def tag_group():
+    item_id = request.form.get('item_id')
+    group_tagged = request.form.get('tagged_group')
+    owner_email = request.form.get('owner_email')
+    tag_group_members(, group_tagged, session['email'])
 
 
 @app.route('/tag/get', methods=['POST'])

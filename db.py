@@ -198,6 +198,19 @@ def remove_tag_on_content_item(email_tagged, email_tagger, item_id):
     return True, 'Successfully deleted content item'
 
 
+def tag_group_members(owner_email, fg_name, email_tagger, item_id):
+  query = ('SELECT email FROM Belong WHERE fg_name=%s AND owner_email=%s')
+  cursor = conn.cursor()
+  cursor.execute(query, (fg_name, owner_email))
+  members = cursor.fetchall()
+  print(members)
+  for member in members:
+      insert = ('INSERT INTO Tag '
+                '(email_tagged, email_tagger, item_id, status, tagtime) '
+                'VALUES(%s, %s, %s, FALSE, NOW())')
+  cursor.execute(insert, (member, email_tagger, item_id))
+
+
 def tag_content_item(email_tagged, email_tagger, item_id):
     tagger_visible, _ = get_content(email_tagger, item_id)
 
