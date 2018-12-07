@@ -2,250 +2,282 @@
 {% block title %}Meow{% endblock %}
 {% block body %}
 <nav id="nav-contain" class="navbar navbar-expand-lg navbar-light bg-light">
-  <div id="nav-bar" class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item">
-        <a class="nav-link" href="/">Home</a>
-      </li>
-      <li class="nav-item ml-auto">
-        <a class="nav-link" href="/"><i id="logo" class="fas fa-cat"></i></a>
-      </li>
-      <li class="nav-item dropdown ml-auto">
-        <a id="profile" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="far fa-user-circle"></i></a>
-        <div class="dropdown-menu" aria-labelledby="profile">
-					{% if not email %}
-	          <a class="dropdown-item" href="/login">Login</a>
-						<a class="dropdown-item" href="/register">Register</a>
-					{% else %}
-						<a class="dropdown-item" href="/logout">Logout</a>
-					{% endif %}
-        </div>
-      </li>
-    </ul>
-  </div>
+    <div id="nav-bar" class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item ml-auto">
+                <a class="nav-link" href="/"><i id="logo" class="fas fa-cat"></i></a>
+            </li>
+            <li class="nav-item dropdown ml-auto">
+                <a id="profile" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="far fa-user-circle"></i></a>
+                <div class="dropdown-menu" aria-labelledby="profile">
+                    {% if not email %}
+                    <a class="dropdown-item" href="/login">Login</a>
+                    <a class="dropdown-item" href="/register">Register</a>
+                    {% else %}
+                    <a class="dropdown-item" href="/logout">Logout</a>
+                    {% endif %}
+                </div>
+            </li>
+        </ul>
+    </div>
 </nav>
 <div id="neko-body" class="container-fluid">
-  <div class="row">
+<div class="row">
     <div class="col-sm-3">
-      <div class="neko-card">
-				{% if email %}
-					<div id="profile-card">
-						<div id="bg-picture"></div>
-						<div id="profile-info-container">
-							<div id="profile-picture"><i class="fas fa-user"></i></div>
-							<div id="profile-info">
-								<p id="name">{{ fname }} {{ lname }}</p>
-								<p id="tag">{{ email }}</p>
-							</div>
-						</div>
-					</div>
-				{% else %}
-					<div id="login-card">
-						<div class="login-section login-upper">
-							<a class="meow btn login-button" href="/login">Login</a>
-						</div>
-						<div class="login-section">
-							<a class="meow btn register-button" href="/register">Register</a>
-						</div>
-					</div>
-				{% endif %}
-      </div>
+        <div class="neko-card">
+            {% if email %}
+            <style>
+                #profile-card:hover {
+                    cursor: pointer;
+                    background-color: #f5f8fa;
+                }
+            </style>
+            <div id="profile-card" data-toggle="modal" data-target="#userModal">
+                <div id="bg-picture"></div>
+                <div id="profile-info-container">
+                    <div id="profile-picture"><i class="fas fa-user"></i></div>
+                    <div id="profile-info">
+                        <p id="name">{{ fname }} {{ lname }}</p>
+                        <p id="tag">{{ email }}</p>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div id="login-card">
+                <div class="login-section login-upper">
+                    <a class="meow btn login-button" href="/login">Login</a>
+                </div>
+                <div class="login-section">
+                    <a class="meow btn register-button" href="/register">Register</a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
     </div>
     <div class="col-sm-6">
-      <div class="neko-card">
-        <div class="submission">
-          <div class="container-fluid submission-container">
-            <div class="submission-row row">
-              <div class="col-sm-1">
-                <div class="submission-profile"><i class="fas fa-user"></i></div>
-              </div>
-              <div class="submission-col col-sm-11">
-                <textarea id="submit-text" placeholder="meow meow meow meow?" name="submission-text" class="submission-text" form="submit-form"></textarea>
-              </div>
-            </div>
-          </div>
-          <form id="submit-form" action="post" method="POST">
-            <button type="submit" class="meow btn submission-button">Meow</button>
-          </form>
-        </div>
-        <ul id="post-container">
-          {% for post in posts %}
-          <li>
-            <div class="post container-fluid" data-toggle="modal" data-target="#postModal">
-              <div class="row">
-                <div class="col-sm-1">
-                  <div class="post-profile"><i class="fas fa-user"></i></div>
-                </div>
-                <div class="col-sm-11">
-                  <div class="post-info">
-                    <span class="post-user">{{ post['item_name'] }}</span><span class="post-tag"> • </span><span class="post-tag">{{ post['email_post'] }}</span>
-                  </div>
-                  <div class="post-content">
-                    {{ post['file_path'] }}
-                    {% if post.link %}
-                      <a class="post-quote" href="{{ post.link }}">
-                        <div class="post-quote-info">
-                          {{ post.link }}
+        <div class="neko-card">
+            <div class="submission">
+                <div class="container-fluid submission-container">
+                    <div class="submission-row row">
+                        <div class="col-sm-1">
+                            <div class="submission-profile"><i class="fas fa-user"></i></div>
                         </div>
-                        {% if post.preview %}
-                          <div class="post-quote-text">
-                            {{ post.preview }}
-                          </div>
-                        {% endif %}
-                      </a>
-                    {% endif %}
-                  </div>
-                  <div class="post-footer">
-                    {% if email %}
-                    <div class="post-actions">
-                      <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Tag"><i class="far fa-hand-peace"></i> <span class="post-action-count">5</span></button>
-                      <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Rate"><i class="far fa-grin"></i> <span class="post-action-count">5</span></button>
-                      <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Comment"><i class="far fa-comment"></i> <span class="post-action-count">5</span></button>
+                        <div class="submission-col col-sm-11">
+                            <textarea id="submit-text" placeholder="meow meow meow meow?" name="submission-text" class="submission-text" form="submit-form"></textarea>
+                        </div>
                     </div>
-                    {% endif %}
-                    <span class="post-time">{{ post['post_time'] }}</span>
-                  </div>
                 </div>
-              </div>
+                <form id="submit-form" action="post" method="POST">
+                    <button type="submit" class="meow btn submission-button">Meow</button>
+                </form>
             </div>
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
+            <ul id="post-container">
+                {% for post in posts %}
+                <li>
+                    <div class="post container-fluid" data-toggle="modal" data-target="#postModal">
+                        <div class="row">
+                            <div class="col-sm-1">
+                                <div class="post-profile"><i class="fas fa-user"></i></div>
+                            </div>
+                            <div class="col-sm-11">
+                                <div class="post-info">
+                                    <span class="post-user">{{ post['item_name'] }}</span><span class="post-tag"> • </span><span class="post-tag">{{ post['email_post'] }}</span>
+                                </div>
+                                <div class="post-content">
+                                    {{ post['file_path'] }}
+                                    {% if post.link %}
+                                    <a class="post-quote" href="{{ post.link }}">
+                                        <div class="post-quote-info">
+                                            {{ post.link }}
+                                        </div>
+                                        {% if post.preview %}
+                                        <div class="post-quote-text">
+                                            {{ post.preview }}
+                                        </div>
+                                        {% endif %}
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                <div class="post-footer">
+                                    {% if email %}
+                                    <div class="post-actions">
+                                        <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Tag"><i class="far fa-hand-peace"></i> <span class="post-action-count">5</span></button>
+                                        <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Rate"><i class="far fa-grin"></i> <span class="post-action-count">5</span></button>
+                                        <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Comment"><i class="far fa-comment"></i> <span class="post-action-count">5</span></button>
+                                    </div>
+                                    {% endif %}
+                                    <span class="post-time">{{ post['post_time'] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
     <div class="col-sm-3">
-			{% if email %}
-      <div class="neko-card">
-        <div id="users-container">
-          <h1>Friend Groups</h1>
-          <button type="submit" class="btn friend-btn">Create</button>
-          <ul id="users-list">
-            {% if not friends %}
-              <li>
-                <div class="container-fluid no-friends">
-                  You are not in any friend groups :(
-                </div>
-              </li>
-            {% endif %}
-            {% for friend in friends %}
-            <li>
-              <div class="users-card container-fluid">
-                <div class="row">
-                  <div class="col-sm-3">
-                    <div class="users-profile"><i class="fas fa-user"></i></div>
-                  </div>
-                  <div class="col-sm-8">
-                    <div class="users-info">
-                      <span class="users-user">{{ user.name }}</span>
-                      {% if user.verified %}
-                        <span class="users-verified"><i class="fas fa-paw"></i></span>
-                      {% endif %}
-                      <br>
-                      <span class="users-tag">@{{ user.username }}</span>
+        {% if email %}
+        <div class="neko-card">
+            <div id="users-container">
+                <h1>Friend Groups</h1>
+                <button type="submit" class="btn friend-btn">Create</button>
+                <ul id="users-list">
+                    {% if not friends %}
+                    <li>
+                        <div class="container-fluid no-friends">
+                            You are not in any friend groups :(
+                        </div>
+                    </li>
+                    {% endif %}
+                    {% for friend in friends %}
+                    <li>
+                        <div class="users-card container-fluid">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="users-profile"><i class="fas fa-user"></i></div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="users-info">
+                                        <span class="users-user">{{ user.name }}</span>
+                                        {% if user.verified %}
+                                        <span class="users-verified"><i class="fas fa-paw"></i></span>
+                                        {% endif %}
+                                        <br>
+                                        <span class="users-tag">@{{ user.username }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<div class="modal fade" id="postModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-1">
+                            <div class="post-profile"><i class="fas fa-user"></i></div>
+                        </div>
+                        <div class="col-sm-11">
+                            <div class="post-info">
+                                <p class="post-user">user</p>
+                                <p class="post-tag">email</p>
+                            </div>
+                        </div>
                     </div>
-                  </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="post-content">
+                                content
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="post-tagged">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="post-footer">
+                                {% if email %}
+                                <div class="post-actions">
+                                    <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Tag"><i class="far fa-hand-peace"></i> <span class="post-action-count">5</span></button>
+                                    <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Rate"><i class="far fa-grin"></i> <span class="post-action-count">5</span></button>
+                                    <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Comment"><i class="far fa-comment"></i> <span class="post-action-count">5</span></button>
+                                </div>
+                                {% endif %}
+                                <span class="post-time">time</span>
+                            </div>
+                            <div class="post-comment">
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </li>
-            {% endfor %}
-          </ul>
+            </div>
         </div>
-      </div>
-			{% endif %}
     </div>
-  </div>
-  <div class="modal fade" id="postModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-body">
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-sm-1">
-              <div class="post-profile"><i class="fas fa-user"></i></div>
-            </div>
-            <div class="col-sm-11">
-              <div class="post-info">
-                <p class="post-user">user</p>
-                <p class="post-tag">email</p>
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-sm-12">
-              <div class="post-content">
-                content
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-sm-12">
-              <div class="post-tagged">
-
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-sm-12">
-              <div class="post-footer">
-                {% if email %}
-                <div class="post-actions">
-                  <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Tag"><i class="far fa-hand-peace"></i> <span class="post-action-count">5</span></button>
-                  <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Rate"><i class="far fa-grin"></i> <span class="post-action-count">5</span></button>
-                  <button type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Comment"><i class="far fa-comment"></i> <span class="post-action-count">5</span></button>
+</div>
+<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div>
+                                <h3>Update Profile Information</h3>
+                                <p class="login-error">{{ error }}</p>
+                                <form method="POST" action="profile">
+                                    <div class="form-group">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="fname" placeholder="First Name" name="fname" value="{{ fname }}">
+                                            <input type="text" class="form-control" id="lname" placeholder="Last Name" name="lname" value="{{ lname }}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="email" class="form-control" id="email" placeholder="Email" name="email" value="{{ email }}">
+                                    </div>
+                                    <button type="submit" class="btn meow">Update</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                {% endif %}
-                <span class="post-time">time</span>
-              </div>
-              <div class="post-comment">
-
-              </div>
             </div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 {% endblock %}
-
 {% block script %}
 <script>
-  $(function () {
-    $('[data-toggle="popover"]').popover({ trigger: "hover" });
-  })
+    $(function () {
+      $('[data-toggle="popover"]').popover({ trigger: "hover" });
+    })
 </script>
 <!-- <script>
-  document.getElementById("submit-form").addEventListener('submit', function(e) {
-    e.preventDefault();
-    var text = document.getElementById("submit-text").value;
-		console.log('hi');
-    if (text.length > 280) {
-      alert("Posts cannot be longer than 280 characters");
-      return;
-    }
+    document.getElementById("submit-form").addEventListener('submit', function(e) {
+      e.preventDefault();
+      var text = document.getElementById("submit-text").value;
+    console.log('hi');
+      if (text.length > 280) {
+        alert("Posts cannot be longer than 280 characters");
+        return;
+      }
 
-    if (text.length == 0) {
-      return;
-    }
+      if (text.length == 0) {
+        return;
+      }
 
-    this.submit();
-  });
+      this.submit();
+    });
 
-  document.getElementById("submit-form-modal").addEventListener('submit', function(e) {
-    e.preventDefault();
-    var text = document.getElementById("submit-text-modal").value;
-    if (text.length > 280){
-      alert("Posts cannot be longer than 280 characters");
-      return;
-    }
+    document.getElementById("submit-form-modal").addEventListener('submit', function(e) {
+      e.preventDefault();
+      var text = document.getElementById("submit-text-modal").value;
+      if (text.length > 280){
+        alert("Posts cannot be longer than 280 characters");
+        return;
+      }
 
-    if (text.length == 0) {
-      return;
-    }
+      if (text.length == 0) {
+        return;
+      }
 
-    this.submit();
-  });
+      this.submit();
+    });
 
-</script> -->
-
+    </script> -->
 {% endblock %}

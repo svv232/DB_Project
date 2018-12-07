@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, session, url_for, redirect
-from db import login_user, register_user, get_public_content, post_content
+from db import login_user, register_user, get_public_content, post_content, get_user, update_user, remove_user_from_group
 from utilities import login_required
 
 import os
@@ -123,6 +123,8 @@ def invite_group():
 @login_required
 def leave_group():
     group = request.form['group']
+    remove_user_from_group(group=group, email=session['email'])
+    return redirect('/')
     # Optional Feature 3 (Person 4)
     # Remove from Belongs Table
     # Modify db.py
@@ -147,9 +149,28 @@ def best_group():
 @app.route('/profile', methods=['POST'])
 @login_required
 def edit_profile():
-    email = request.form['email']
-    fname = request.form['fname']
-    lname = request.form['lname']
+    user = get_user(session['email'])
+    db_email = user['email']
+    db_first = user['fname']
+    db_last = user['lname']
+
+    new_email = request.form.get('email') if request.form.get('email') != db_email else None
+    new_first = request.form.get('fname') if request.form.get('fname') != db_first else None
+    new_last = request.form.get('lname') if request.form.get('lname') != db_last else None
+
+    status = update_user(db_email, new_email=new_email, new_first=new_first, new_last=new_last)
+
+    if status[0]:
+        if new_email:
+            user = get_user(new_email)
+        else:
+            user = get_user(session['email'])
+
+        session['email'] = user['email']
+        session['fname'] = user['fname']
+        session['lname'] = user['lname']
+
+    return redirect('/')
     # Optional Feature 5 (Person 4)
     # Update Queries for User
     # Modify db.py
@@ -157,7 +178,6 @@ def edit_profile():
     #   (if not changing fname, it'll be original fname)
     # Return Value: Success or Error Message
     # i.e. (True, 'Success') or (False, 'Email already exists')
-    pass
 
 
 # Done:
