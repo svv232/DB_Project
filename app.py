@@ -95,7 +95,7 @@ def post():
         private = False
     success, id, msg = post_content(email, title, post, not private)
 
-    if private == 'True':
+    if private:
         share_with_group(share[0][1], share[0][0], id)
     return redirect('/')
 
@@ -146,7 +146,7 @@ def tag():
 @login_required
 def get_tag():
     item_id = request.get_json().get('item_id')
-    _, content = get_tags_from_item_id(item_id)
+    err, content = get_tags_from_item_id(session['email'], item_id)
     for tag in content:
         tag['tagtime'] = str(tag['tagtime'])
     # Optional Feature 4 (tag group) (Person 2)
@@ -221,7 +221,8 @@ def invite_group():
 def leave_group():
     group = request.form['fg_name']
     owner_email = request.form['owner_email']
-    remove_user_from_group(group=group, owner_email=owner_email, email=session['email'])
+    remove_user_from_group(
+        group=group, owner_email=owner_email, email=session['email'])
     return redirect('/')
 
 
@@ -247,11 +248,15 @@ def edit_profile():
     db_first = user['fname']
     db_last = user['lname']
 
-    new_email = request.form.get('email') if request.form.get('email') != db_email else None
-    new_first = request.form.get('fname') if request.form.get('fname') != db_first else None
-    new_last = request.form.get('lname') if request.form.get('lname') != db_last else None
+    new_email = request.form.get('email') if request.form.get(
+        'email') != db_email else None
+    new_first = request.form.get('fname') if request.form.get(
+        'fname') != db_first else None
+    new_last = request.form.get('lname') if request.form.get(
+        'lname') != db_last else None
 
-    status = update_user(db_email, new_email=new_email, new_first=new_first, new_last=new_last)
+    status = update_user(db_email, new_email=new_email,
+                         new_first=new_first, new_last=new_last)
 
     if status[0]:
         if new_email:

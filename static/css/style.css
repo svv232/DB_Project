@@ -548,7 +548,7 @@ textarea:focus {
 
 .friend-container h1 {
   font-size: 18px;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .friend-container h2 {
@@ -564,7 +564,7 @@ textarea:focus {
 .friend-container ul {
   font-size: 14px;
   list-style-type: none;
-  padding-left: 10px;
+  padding-left: 0;
 }
 
 .friend-container .friend-owner {
@@ -573,7 +573,8 @@ textarea:focus {
 }
 
 .friend-container .friend-header {
-  margin-bottom: 0px;
+  display: inline-block;
+  margin-bottom: 10px;
 }
 
 .friend-container input {
@@ -764,10 +765,50 @@ textarea:focus {
   border: 0;
   color: #1DA1F2;
   background-color: transparent;
+  z-index: 9999;
 }
 
 .leave-form button:hover {
   background-color: transparent;
   text-decoration: underline;
   cursor: pointer;
+}
+
+.tag-card {
+  font-size: 14px;
+}
+
+#tag-container {
+  padding-bottom: 10px;
+}
+
+#tag-container h1 {
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px 0px 0px 15px;
+  margin: 0;
+  margin-bottom: 10px;
+  display: inline-block;
+}
+
+.tag-item {
+  color: #1DA1F2 !important;
+}
+
+.tag-item:hover {
+  text-decoration: underline !important;
+  cursor: pointer !important;
+}
+
+.tag-accept {
+  color: #1DA1F2 !important;
+}
+
+.tag-accept:hover {
+  text-decoration: underline !important;
+  cursor: pointer !important;
+}
+
+.tag-modal {
+  max-width: 400px;
 }

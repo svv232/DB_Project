@@ -16,7 +16,7 @@ Array.from(posts).forEach(function(element) {
     }).then(function(response) {
       return response.json();
     })
-    .then(function(content) {
+    .then(content => {
       document.getElementById('postModalEmail').innerHTML = content['email_post'];
       document.getElementById('postModalContent').innerHTML = content['file_path'];
       document.getElementById('postModalName').innerHTML = content['item_name'];
@@ -24,10 +24,70 @@ Array.from(posts).forEach(function(element) {
       document.getElementById('postTag').setAttribute('post-id', content['item_id']);
       document.getElementById('postRate').setAttribute('post-id', content['item_id']);
       document.getElementById('tagId').value = content['item_id'];
-      $('#postModal').modal('show');
+      fetch('http://localhost:5000/tag/get', {
+        method: 'POST',
+        body: JSON.stringify({item_id: this.getAttribute('post-id')}),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(function(response) {
+        return response.json();
+      })
+      .then(function(content) {
+        document.getElementById('postTag').innerHTML = content.length + '<span> Tags</span>';
+        document.getElementById('taggedEmails').innerHTML = '';
+        for (tagged in content) {
+          document.getElementById('taggedEmails').innerHTML += '<li><span class="font-weight-bold">' + content[tagged]['email_tagger'] + '</span><span> tagged </span><span class="font-weight-bold">' + content[tagged]['email_tagged'] + '</li>'
+        }
+        $('#postModal').modal('show');
+      });
     });
   });
 });
+
+let tags = document.getElementsByClassName('tag-item');
+
+Array.from(tags).forEach(function(element) {
+  element.addEventListener('click', function(e) {
+    e.preventDefault();
+    fetch('http://localhost:5000/get_post', {
+      method: 'POST',
+      body: JSON.stringify({item_id: this.innerHTML}),
+      headers:{
+        'Content-Type': 'application/json'
+      }
+    }).then(function(response) {
+      return response.json();
+    })
+    .then(content => {
+      document.getElementById('postModalEmail').innerHTML = content['email_post'];
+      document.getElementById('postModalContent').innerHTML = content['file_path'];
+      document.getElementById('postModalName').innerHTML = content['item_name'];
+      document.getElementById('postModalDate').innerHTML = content['post_time'];
+      document.getElementById('postTag').setAttribute('post-id', content['item_id']);
+      document.getElementById('postRate').setAttribute('post-id', content['item_id']);
+      document.getElementById('tagId').value = content['item_id'];
+      fetch('http://localhost:5000/tag/get', {
+        method: 'POST',
+        body: JSON.stringify({item_id: this.getAttribute('post-id')}),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(function(response) {
+        return response.json();
+      })
+      .then(function(content) {
+        document.getElementById('postTag').innerHTML = content.length + '<span> Tags</span>';
+        document.getElementById('taggedEmails').innerHTML = '';
+        for (tagged in content) {
+          document.getElementById('taggedEmails').innerHTML += '<li><span>' + content[tagged]['email_tagger'] + '</span><span>tagged</span><span>' + content[tagged]['email_tagged'] + '</li>'
+        }
+        $('#postModal').modal('show');
+      });
+    });
+  });
+});
+
 
 let groups = document.getElementsByClassName('users-info');
 
@@ -50,6 +110,8 @@ Array.from(groups).forEach(function(element) {
       document.getElementById('groupFriendDesc').innerHTML = content['description'];
       document.getElementById('groupFriendNameInput').value = content['fg_name'];
       document.getElementById('groupFriendOwnerInput').value = content['owner_email'];
+      document.getElementById('leaveGroup').value = content['fg_name'];
+      document.getElementById('leaveOwner').value = content['owner_email'];
       fetch('http://localhost:5000/group/members', {
         method: 'POST',
         body: JSON.stringify({fg_name: this.getElementsByClassName('users-user')[0].innerHTML,
@@ -78,23 +140,7 @@ Array.from(groups).forEach(function(element) {
 
 document.getElementById('postTag').addEventListener('click', function(e) {
   e.preventDefault();
-  fetch('http://localhost:5000/tag/get', {
-    method: 'POST',
-    body: JSON.stringify({item_id: this.getAttribute('post-id')}),
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).then(function(response) {
-    return response.json();
-  })
-  .then(function(content) {
-    console.log(content);
-    document.getElementById('taggedEmails').innerHTML = ''
-    for (tagged in content) {
-      document.getElementById('taggedEmails').innerHTML += '<li>' + content[tagged]['email_tagged'] + '</li>'
-    }
-    $('#tagModal').modal('show');
-  });
+  $('#tagModal').modal('show');
 });
 
 document.getElementById('postRate').addEventListener('click', function(e) {
