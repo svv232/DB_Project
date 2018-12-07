@@ -374,10 +374,18 @@ def ratings_on_content(email, item_id):
 
 def add_rating(rater_email, item_id, emoji):
     cursor = conn.cursor()
-    query = ('INSERT INTO Rate '
-             '(email, item_id, rate_time, emoji) '
-             'VALUES(%s, %s, NOW(), %s)')
-    cursor.execute(query, (rater_email, item_id, emoji))
+    check = ('SELECT emoji FROM Rate WHERE item_id =%s and email=%s')
+    cursor.execute(check, (item_id, rater_email))
+    content = cursor.fetchall()
+    print(content)
+    if not len(content):
+        query = ('INSERT INTO Rate '
+                 '(email, item_id, rate_time, emoji) '
+                 'VALUES(%s, %s, NOW(), %s)')
+        cursor.execute(query, (rater_email, item_id, emoji))
+    else:
+        query = ('UPDATE Rate SET emoji=%s WHERE item_id=%s')
+        cursor.execute(query, (emoji, item_id))
     conn.commit()
     cursor.close()
     return True, "Success"
