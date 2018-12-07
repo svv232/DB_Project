@@ -384,25 +384,44 @@ def add_rating(rater_email, item_id, emoji):
 
 
 def add_comment(item_id, comment, commenter_email):
+    # First check if item_id is actually visible to the commenter
+    # First result of get_content is the status
+    #   (whether it found anything or not)
+    visible, _ = get_content(commenter_email, item_id)
+
+    # Return if item_id is not visible
+    if not visible:
+        return False, 'ContentItem is not accessible to the current commenter'
+
+    # Ensure that comment is not greater than DB VARCHAR
+    if len(comment) > 256:
+        return False, 'Comment is too long'
+
+    # Execute the INSERT query
     cursor = conn.cursor()
     query = ('INSERT INTO Comment '
-             '(item_id, comment, commenter_email)'
-             'VALUES(%s, %s, %s)')
+             '(item_id, comment, commenter_email, comment_time)'
+             'VALUES(%s, %s, %s, NOW())')
     cursor.execute(query, (item_id, comment, commenter_email))
     conn.commit()
     cursor.close()
+
+    # Should always work since error checks prior
     return True, "Success"
 
 
 def get_comments(item_id, email):
+    # Get comments but also check that item_id is visible to the user
     cursor = conn.cursor()
     query = ('SELECT * FROM Comment WHERE item_id=%s AND item_id IN '
              '(SELECT DISTINCT item_id FROM ContentItem WHERE item_id IN '
              '(SELECT item_id FROM Share INNER JOIN Belong ON '
              'Belong.fg_name=Share.fg_name AND '
              'Belong.owner_email=Share.owner_email AND Belong.email=%s) '
-             'OR is_pub OR email_post=%s)')
+             'OR is_pub OR email_post=%s) ORDER BY comment_time DESC')
     cursor.execute(query, (item_id, email, email))
     content = cursor.fetchall()
     cursor.close()
+
+    # Should always work, returns nothing in content if nothing found
     return True, content
