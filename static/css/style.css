@@ -736,3 +736,16 @@ textarea:focus {
   margin-top: 35px;
   margin-left: -10px;
 }
+
+.privacy-on {
+  background-color: #f8f9fa !important;
+  color: #4AB3F4 !important;
+}
+
+.privacyGroup {
+  background-color: white;
+}
+
+.privacyGroup:active {
+  color: black !important;
+}

@@ -81,12 +81,12 @@ def get_my_content(email):
 
 def get_content(email, item_id):
     cursor = conn.cursor()
-    query = ('SELECT * FROM ContentItem WHERE item_id IN '
+    query = ('SELECT * FROM (SELECT * FROM ContentItem WHERE item_id IN '
              '(SELECT item_id FROM Share INNER JOIN Belong ON '
              'Belong.fg_name=Share.fg_name AND '
              'Belong.owner_email=Share.owner_email AND Belong.email=%s) '
-             'OR is_pub AND item_id=%s')
-    cursor.execute(query, (email, item_id))
+             'OR is_pub OR email_post=%s) AS my_content WHERE item_id=%s')
+    cursor.execute(query, (email, email, item_id))
     content = cursor.fetchall()
     cursor.close()
     if not content:

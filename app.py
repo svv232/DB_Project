@@ -85,6 +85,10 @@ def post():
     post = request.form.get('submission-text')
     private = request.form.get('private')
     if private == 'True':
+        share = request.form.get('share')
+        if share != '':
+            share = share.split(',')
+            share = [x.split(':') for x in share]
         private = True
     elif private == 'False':
         private = False
@@ -120,11 +124,11 @@ def rate():
     pass
 
 
-@app.route('/tag')
+@app.route('/tag', methods=['POST'])
 @login_required
 def tag():
-    item_id = request.args['item_id']
-    email_tagged = request.args['email_tagged']
+    item_id = request.form.get('item_id')
+    email_tagged = request.form.get('tagged_email')
     tag_content_item(email_tagged, session['email'], item_id)
     # Optional Feature 4 (tag group) (Person 2)
     # Modify db.py
@@ -233,9 +237,13 @@ def best_group():
     pass
 
 
-@app.route('/profile', methods=['POST'])
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
-def edit_profile():
+def profile():
+    if request.method == 'GET':
+        return render_template('profile.html', fname=session['fname'],
+                               lname=session['lname'], email=session['email'])
+
     email = request.form['email']
     fname = request.form['fname']
     lname = request.form['lname']

@@ -2,7 +2,7 @@ $(function () {
   $('[data-toggle="popover"]').popover({ trigger: "hover" });
 })
 
-posts = document.getElementsByClassName('post');
+let posts = document.getElementsByClassName('post');
 
 Array.from(posts).forEach(function(element) {
   element.addEventListener('click', function(e) {
@@ -23,12 +23,13 @@ Array.from(posts).forEach(function(element) {
       document.getElementById('postModalDate').innerHTML = content['post_time'];
       document.getElementById('postTag').setAttribute('post-id', content['item_id']);
       document.getElementById('postRate').setAttribute('post-id', content['item_id']);
+      document.getElementById('tagId').value = content['item_id'];
       $('#postModal').modal('show');
     });
   });
 });
 
-groups = document.getElementsByClassName('users-card');
+let groups = document.getElementsByClassName('users-card');
 
 Array.from(groups).forEach(function(element) {
   element.addEventListener('click', function(e) {
@@ -106,8 +107,8 @@ document.getElementById('commentButton').addEventListener('click', function(e) {
 
 var modal_lv = 0;
 $('.modal').on('shown.bs.modal', function (e) {
-    $('.modal-backdrop:last').css('zIndex',1051+modal_lv);
-    $(e.currentTarget).css('zIndex',1052+modal_lv);
+    $('.modal-backdrop:last').css('zIndex',1051 + modal_lv);
+    $(e.currentTarget).css('zIndex',1052 + modal_lv);
     modal_lv++
 });
 
@@ -126,4 +127,41 @@ document.getElementById('submissionPrivacy').addEventListener('click', function(
     document.getElementById('submissionPrivacyForm').value = 'True';
     $('#privacyMenu').toggle()
   }
+});
+
+let privacyGroups = document.getElementsByClassName('privacy-group')
+var shareWith = []
+
+Array.from(privacyGroups).forEach(function(element) {
+  element.addEventListener('click', function(e) {
+    e.preventDefault();
+    if (this.classList.contains("privacy-on")) {
+      this.classList.remove("privacy-on");
+      fg_name = this.getElementsByClassName('privacy-group-name')[0].innerHTML;
+      owner_email = this.getElementsByClassName('privacy-group-owner')[0].innerHTML;
+      var index = shareWith.indexOf(fg_name + ':' + owner_email);
+      if (index > -1) {
+        shareWith.splice(index, 1);
+      }
+    } else {
+      this.classList.add("privacy-on");
+      fg_name = this.getElementsByClassName('privacy-group-name')[0].innerHTML;
+      owner_email = this.getElementsByClassName('privacy-group-owner')[0].innerHTML;
+      var index = shareWith.indexOf(fg_name + ':' + owner_email);
+      if (index == -1) {
+        shareWith.push(fg_name + ':' + owner_email);
+      }
+    }
+    return false;
+  });
+});
+
+document.getElementById('submit-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'share';
+  input.value = shareWith.join();
+  this.appendChild(input);
+  this.submit();
 });

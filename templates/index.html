@@ -17,6 +17,7 @@
 	          <a class="dropdown-item" href="/login">Login</a>
 						<a class="dropdown-item" href="/register">Register</a>
 					{% else %}
+            <a class="dropdown-item" href="/profile">Profile</a>
 						<a class="dropdown-item" href="/logout">Logout</a>
 					{% endif %}
         </div>
@@ -61,7 +62,7 @@
                 <div class="submission-profile"><i class="fas fa-user"></i></div>
               </div>
               <div class="submission-col col-sm-11">
-                <input id="submit-title" placeholder="Title" name="submission-title" class="submission-title" form="submit-form"></input>
+                <input id="submit-title" placeholder="Title" name="submission-title" class="submission-title" form="submit-form">
                 <textarea id="submit-text" placeholder="meow meow meow meow?" name="submission-text" class="submission-text" form="submit-form"></textarea>
               </div>
             </div>
@@ -69,8 +70,9 @@
           <div class="dropdown">
             <button type="button" id="submissionPrivacy" class="btn submission-link" aria-haspopup="true" aria-expanded="false"><i class="fas fa-ghost"></i></button>
             <div id="privacyMenu" class="dropdown-menu" aria-labelledby="submissionPrivacy">
+              <h6 class="dropdown-header">Share With</h6>
               {% for group in groups %}
-                <a class="dropdown-item privacyGroup" href="#">{{ group.fg_name }}</a>
+                <a class="dropdown-item privacy-group" href="#"><span class="privacy-group-name">{{ group.fg_name }}</span><span> • </span><span class="privacy-group-owner">{{ group.owner_email }}</span></a>
               {% endfor %}
             </div>
           </div>
@@ -229,8 +231,9 @@
                   <div class="post-actions">
                     <div class="dropdown">
                       <button id="tagButton" type="button" class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span data-toggle="popover" data-placement="top" data-content="Tag" data-container="body"><i class="far fa-hand-peace"></i></span></button>
-                      <form class="dropdown-menu tag-menu" aria-labelledby="tagButton">
+                      <form class="dropdown-menu tag-menu" aria-labelledby="tagButton" action="tag">
                         <div class="form-group">
+                          <input id="tagId" type="hidden" value="">
                           <input type="email" class="form-control" placeholder="Tag Email" name="tagged-email">
                           <button type="submit" class="btn">Tag</button>
                         </div>
