@@ -4,7 +4,7 @@ from hashlib import sha256
 conn = pymysql.connect(host='localhost',
                        port=3306,
                        user='PriCoSha',
-                       password='PriCoSha',
+                       password='YES',
                        db='PriCoSha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -103,7 +103,6 @@ def create_friend_group(owner_email, fg_name, description):
     cursor.close()
     return True, 'Successfully Created FriendGroup'
 
-
 def get_my_friend_groups(email):
     cursor = conn.cursor()
     query = ('SELECT fg_name, owner_email FROM Friendgroup WHERE '
@@ -155,8 +154,10 @@ def get_friend_group(email, fg_name, owner):
              'WHERE owner_email=%s UNION SELECT fg_name '
              'FROM Belong WHERE email=%s)')
     cursor.execute(query, (owner, fg_name, email, email))
+    print('hello')
     content = cursor.fetchall()
     cursor.close()
+    print(content)
     return True, content[0]
 
 
@@ -166,9 +167,12 @@ def get_friend_group_members(email, owner, fg_name):
              'AND fg_name IN (SELECT fg_name FROM Friendgroup '
              'WHERE owner_email=%s UNION SELECT fg_name '
              'FROM Belong WHERE email=%s)')
-    cursor.execute(query, (owner, fg_name, email, email))
+    query = ('SELECT email FROM Belong WHERE owner_email=%s AND fg_name=%s')
+    print(owner, fg_name)
+    cursor.execute(query, (owner, fg_name))
     content = cursor.fetchall()
     cursor.close()
+    print(content)
     return True, content
 
 
@@ -177,6 +181,7 @@ def accept_tag_on_content_item(email_tagged, email_tagger, item_id):
     query = ('UPDATE Tag SET status=TRUE WHERE email_tagged=%s AND'
              'email_tagger=%s AND item_id=%s')
     cursor.execute(query, (email_tagged, email_tagger, item_id))
+    conn.commit()
     cursor.close()
     return True, 'Successfully updated tag on content item'
 
@@ -186,6 +191,7 @@ def remove_tag_on_content_item(email_tagged, email_tagger, item_id):
     query = ('DELETE FROM tag WHERE email_tagged=%s '
              'AND email_tagger=%s AND item_id=%s')
     cursor.execute(query, (email_tagged, email_tagger, item_id))
+    conn.commit()
     cursor.close()
     return True, 'Successfully deleted content item'
 
@@ -213,34 +219,45 @@ def tag_content_item(email_tagged, email_tagger, item_id):
     return content, 'Successfully tagged ContentItem'
 
 
-def add_friend(fname, lname, email, owner_email, fg_name):
+def add_friend(fname, lname, email, owner_email, fg_name): 
     cursor = conn.cursor()
     query = ('SELECT fg_name FROM Friendgroup WHERE owner_email=%s')
-    cursor.execute(query, (owner_email))
+    cursor.execute(query, (owner_email,))
     content = cursor.fetchall()
-    if not ((owner_email,) in content):
+    print(content)
+    if len([g for g in content if g['fg_name'] == fg_name]) == 0:
+        print('Failed to insert -- not owner')
         return False, "You can only insert in groups you own"
 
-    query = ('SELECT email FROM Person WHERE email=%s')
-    cursor.execute(query, (email))
+    query = ('SELECT email FROM Person WHERE fname=%s AND lname=%s')
+    cursor.execute(query, (fname, lname))
 
     content = cursor.fetchall()
+    print(content)
     if not len(content):
         return False, "A Person with this email does not exist"
+    if len(content) > 1:
+        return False, "Multiple People with this name exist"
 
-    query = ("SELECT * from Belong WHERE email=%s AND owner_email=%s "
+    print(content)
+    new_member_email = content[0]['email']
+
+    query = ("SELECT email from Belong WHERE owner_email=%s "
              "AND fg_name=%s")
-    cursor.execute(query, (email, owner_email, fg_name))
+    cursor.execute(query, (owner_email, fg_name))
     content = cursor.fetchall()
-    if len(content):
+    print(content)
+    if len([e for e in content if e['email'] == new_member_email]):
+        print('Duplicate add')
         return False, "This Person is already in this friend group"
 
     query = ('INSERT into Belong (email, owner_email, fg_name) '
              'VALUES (%s, %s, %s)')
 
-    cursor.execute(query, (email, owner_email, fg_name))
+    cursor.execute(query, (new_member_email, owner_email, fg_name))
     conn.commit()
     cursor.close()
+    print('Finished')
     return True, 'Successfully added user to friend group'
 
 

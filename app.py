@@ -195,7 +195,8 @@ def get_group():
 def get_group_members():
     fg_name = request.get_json().get('fg_name')
     owner = request.get_json().get('owner_email')
-    _, content = get_friend_group_members(session['email'], fg_name, owner)
+    _, content = get_friend_group_members(session['email'], owner, fg_name)
+    print(content)
     return json.dumps(content)
 
 
