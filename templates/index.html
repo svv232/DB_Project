@@ -96,7 +96,7 @@
                 </div>
                 <div class="col-sm-11">
                   <div class="post-info">
-                    <span class="post-user">{{ post['item_name'] }}</span><span class="post-tag"> • </span><span class="post-tag">{{ post['email_post'] }}</span>
+                    <span class="post-user">{{ post['item_name'] }}</span><span class="post-tag"> • </span><span class="post-tag">{{ post['email_post'] }} <i class="fas fa-star"  {% if post['email_post'] in best_friends %} style="color:#1da1f2"{% endif %}></i> </span>
                   </div>
                   <div class="post-content">
                     {{ post['file_path'] }}

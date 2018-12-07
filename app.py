@@ -23,12 +23,13 @@ def index():
         return render_template('index.html', posts=posts)
 
     _, posts = get_my_content(session['email'])
-    _, groups = get_my_friend_groups(session['email'])
     _, tags = get_my_tags(session['email'])
     _, best_friends = get_best_friends(session['email'])
+    _, groups = get_my_friend_groups(session['email'])
+    bff_list = [ a['email'] for a in best_friends]
     return render_template('index.html', email=session['email'],
                            fname=session['fname'], lname=session['lname'],
-                           posts=posts, groups=groups, tags=tags)
+                           posts=posts, groups=groups, tags=tags, best_friends = bff_list)
 
 
 @app.route('/login', methods=['GET', 'POST'])

@@ -107,8 +107,8 @@ def create_friend_group(owner_email, fg_name, description):
 def get_my_friend_groups(email):
     cursor = conn.cursor()
     query = ('SELECT fg_name, owner_email FROM Friendgroup WHERE '
-             'AND owner_email=%s UNION SELECT fg_name, owner_email '
-             'FROM Belong WHERE email=%s')
+             'owner_email=%s UNION SELECT fg_name, owner_email '
+             'FROM Belong WHERE email=%s AND fg_name != "Best Friends"')
     cursor.execute(query, (email, email))
     content = cursor.fetchall()
     cursor.close()
@@ -220,7 +220,7 @@ def check_tagged_group_post_visibility(owner_email, fg_name, item_id):
     members = cursor.fetchall()
     group_visibility = True
     for member in members:
-        group_visibility = group_visibility && member[0][1]
+        group_visibility = group_visibility and member[0][1]
     cursor.close()
     return group_visibility
 
@@ -452,14 +452,16 @@ def create_best_friends_group(owner_email):
         query = ('INSERT INTO Friendgroup'
                  '(owner_email, fg_name, description, best_friend) VALUES (%s, %s, %s, TRUE)')
 
-        cursor.execute(query, (owner_email, "Best Friends" , "BEST_FRIENDS_GROUP"))
+        cursor.execute(query, (owner_email, "Best Friends" , "This group contains your very best friends!"))
         conn.commit()
         cursor.close()
     return True, "Success"
 
 def check_for_best_friends(owner_email):
+    cursor = conn.cursor()
     query = 'SELECT * FROM Friendgroup WHERE owner_email=%s AND best_friend=TRUE'
-    result = cursor.fetchone(query, (owner_email))
+    cursor.execute(query, (owner_email))
+    result = cursor.fetchone()
     cursor.close()
     exists = result is not None
     message = "Best friends group does not exist" 
@@ -475,10 +477,13 @@ def get_my_best_friend_group(email):
     cursor.execute(query, (email, email))
     content = cursor.fetchall()
     cursor.close()
+    if not content:
+        create_best_friends_group(email)
+        return get_my_best_friend_group(email)
     return True, content
 
 def get_best_friends(email):
-    _, best_friend_group = get_my_best_friend_group(email)
+    res, best_friend_group = get_my_best_friend_group(email)
     res, members = get_friend_group_members(email, email, best_friend_group[0]['fg_name'])
     return res, members
 
