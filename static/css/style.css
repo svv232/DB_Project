@@ -681,7 +681,7 @@ textarea:focus {
 }
 
 .post-comments p {
-  font-size: 12px;
+  font-size: 14px;
   margin-bottom: 0px;
   margin-left: 5px;
 }
@@ -810,5 +810,14 @@ textarea:focus {
 }
 
 .tag-modal {
-  max-width: 400px;
+  max-width: 4o00px;
+}
+
+.emoji-container {
+  min-width: 0;
+}
+
+.emoji-container .dropdown-item {
+  padding: 0 5px;
+  font-size: 18px;
 }

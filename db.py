@@ -389,7 +389,7 @@ def add_comment(item_id, comment, commenter_email):
     return True, "Success"
 
 
-def get_comments(email, item_id):
+def get_comments(item_id, email):
     cursor = conn.cursor()
     query = ('SELECT * FROM Comment WHERE item_id=%s AND item_id IN '
              '(SELECT DISTINCT item_id FROM ContentItem WHERE item_id IN '

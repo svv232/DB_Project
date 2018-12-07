@@ -24,6 +24,7 @@ Array.from(posts).forEach(function(element) {
       document.getElementById('postTag').setAttribute('post-id', content['item_id']);
       document.getElementById('postRate').setAttribute('post-id', content['item_id']);
       document.getElementById('tagId').value = content['item_id'];
+      document.getElementById('commentId').value = content['item_id'];
       fetch('http://localhost:5000/tag/get', {
         method: 'POST',
         body: JSON.stringify({item_id: this.getAttribute('post-id')}),
@@ -33,13 +34,28 @@ Array.from(posts).forEach(function(element) {
       }).then(function(response) {
         return response.json();
       })
-      .then(function(content) {
+      .then(content => {
         document.getElementById('postTag').innerHTML = content.length + '<span> Tags</span>';
         document.getElementById('taggedEmails').innerHTML = '';
         for (tagged in content) {
           document.getElementById('taggedEmails').innerHTML += '<li><span class="font-weight-bold">' + content[tagged]['email_tagger'] + '</span><span> tagged </span><span class="font-weight-bold">' + content[tagged]['email_tagged'] + '</li>'
         }
-        $('#postModal').modal('show');
+        fetch('http://localhost:5000/comment/get', {
+          method: 'POST',
+          body: JSON.stringify({item_id: this.getAttribute('post-id')}),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(function(response) {
+          return response.json();
+        })
+        .then(function(content) {
+          document.getElementById('postComments').innerHTML = ''
+          for (comment in content) {
+            document.getElementById('postComments').innerHTML += "<li><div class='post-info'><span class='post-user'>" + content[comment]['commenter_email'] + "</span></div><p>" + content[comment]['comment'] + "</p></li>"
+          }
+          $('#postModal').modal('show');
+        });
       });
     });
   });
@@ -76,13 +92,29 @@ Array.from(tags).forEach(function(element) {
       }).then(function(response) {
         return response.json();
       })
-      .then(function(content) {
+      .then(content => {
         document.getElementById('postTag').innerHTML = content.length + '<span> Tags</span>';
         document.getElementById('taggedEmails').innerHTML = '';
         for (tagged in content) {
           document.getElementById('taggedEmails').innerHTML += '<li><span>' + content[tagged]['email_tagger'] + '</span><span>tagged</span><span>' + content[tagged]['email_tagged'] + '</li>'
         }
-        $('#postModal').modal('show');
+        fetch('http://localhost:5000/rate/get', {
+          method: 'POST',
+          body: JSON.stringify({item_id: this.getAttribute('post-id')}),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(function(response) {
+          return response.json();
+        })
+        .then(function(content) {
+          document.getElementById('postTag').innerHTML = content.length + '<span> Tags</span>';
+          document.getElementById('taggedEmails').innerHTML = '';
+          for (tagged in content) {
+            document.getElementById('taggedEmails').innerHTML += '<li><span>' + content[tagged]['email_tagger'] + '</span><span>tagged</span><span>' + content[tagged]['email_tagged'] + '</li>'
+          }
+          $('#postModal').modal('show');
+        });
       });
     });
   });
@@ -145,7 +177,7 @@ document.getElementById('postTag').addEventListener('click', function(e) {
 
 document.getElementById('postRate').addEventListener('click', function(e) {
   e.preventDefault();
-
+  $('#rateModal').modal('show');
 });
 
 document.getElementById('commentButton').addEventListener('click', function(e) {
@@ -201,6 +233,15 @@ Array.from(privacyGroups).forEach(function(element) {
       }
     }
     return false;
+  });
+});
+
+let emojis = document.getElementsByClassName('emoji-link')
+Array.from(emojis).forEach(function(element) {
+  element.addEventListener('click', function(e) {
+    e.preventDefault();
+    var href = e.target.getAttribute('href');
+    window.location.href = href + document.getElementById('tagId').value;
   });
 });
 

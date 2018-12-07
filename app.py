@@ -4,8 +4,9 @@ from db import create_friend_group, get_my_content, get_my_friend_groups
 from db import get_content, get_friend_group, add_friend, get_my_tags
 from db import tag_content_item, remove_tag_on_content_item
 from db import accept_tag_on_content_item, get_friend_group_members
-from db import get_tags_from_item_id, count_ratings_on_content, add_rating
+from db import get_tags_from_item_id, ratings_on_content, add_rating
 from db import get_user, update_user, remove_user_from_group, share_with_group
+from db import add_comment, get_comments
 from utilities import login_required
 
 import os
@@ -119,13 +120,32 @@ def get_posts():
     pass
 
 
+@app.route('/rate')
+@login_required
 def rate():
-    # Optional Feature 1 (Person 2)
-    # Modify db.py
-    # Idk add rating also would like query to get number of rates by item_id
-    # Return Value: Success or Error Message
-    # i.e. (True, 'Success') or (False, 'Post does not exist')
-    pass
+    item_id = request.args['item_id']
+    emoji = request.args['emoji']
+    if emoji == '0':
+        emoji = '👍'
+    elif emoji == '1':
+        emoji = '😮'
+    elif emoji == '2':
+        emoji = '😥'
+    elif emoji == '3':
+        emoji = '😡'
+    elif emoji == '4':
+        emoji = '😂'
+
+    add_rating(session['email'], item_id, emoji)
+    return redirect('/')
+
+
+@app.route('/rate/get', methods=['POST'])
+@login_required
+def comments():
+    item_id = request.get_json().get('item_id')
+    _, content = ratings_on_content(item_id, session['email'])
+    return json.dumps(content)
 
 
 @app.route('/tag', methods=['POST'])
@@ -173,9 +193,22 @@ def accept_tag():
     return redirect('/')
 
 
+@app.route('/comment/get', methods=['POST'])
+@login_required
+def comments():
+    item_id = request.get_json().get('item_id')
+    _, content = get_comments(item_id, session['email'])
+    return json.dumps(content)
+
+
+@app.route('/comment', methods=['POST'])
+@login_required
 def comment():
-    # Optional Feature 2 (Roy)
-    pass
+    item_id = request.form['item_id']
+    comment = request.form['comment']
+    print('item', item_id)
+    add_comment(item_id, comment, session['email'])
+    return redirect('/')
 
 
 @app.route('/group/create', methods=['POST'])
