@@ -89,9 +89,10 @@ document.getElementById('postTag').addEventListener('click', function(e) {
     return response.json();
   })
   .then(function(content) {
+    console.log(content);
     document.getElementById('taggedEmails').innerHTML = ''
     for (tagged in content) {
-      document.getElementById('taggedEmails').innerHTML += '<li>' + content['email'] + '</li>'
+      document.getElementById('taggedEmails').innerHTML += '<li>' + content[tagged]['email_tagged'] + '</li>'
     }
     $('#tagModal').modal('show');
   });

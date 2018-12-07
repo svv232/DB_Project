@@ -116,13 +116,13 @@ def get_my_friend_groups(email):
 
 def get_my_content_ids(email):
     cursor = conn.cursor()
-    query = ('SELECT item_id FROM ContentItem WHERE'
-             'item_id IN (SELECT item_id FROM Share INNER JOIN Belong ON'
-             'Belong.fg_name=Share.fg_name AND'
-             'Belong.owner_email=Share.owner_email AND Belong.email=%s))'
-             'OR is_pub')
+    query = ('SELECT DISTINCT item_id FROM ContentItem WHERE item_id IN '
+             '(SELECT item_id FROM Share INNER JOIN Belong ON '
+             'Belong.fg_name=Share.fg_name AND '
+             'Belong.owner_email=Share.owner_email AND Belong.email=%s) '
+             'OR is_pub OR email_post=%s ')
 
-    cursor.execute(query, (email))
+    cursor.execute(query, (email, email))
     content = cursor.fetchall()
 
     cursor.close()
@@ -197,26 +197,25 @@ def remove_tag_on_content_item(email_tagged, email_tagger, item_id):
 
 
 def tag_content_item(email_tagged, email_tagger, item_id):
-    my_ids, _ = get_my_content_ids(email_tagger)
-    visibility = (item_id,) in get_my_content_ids(item_id)
+    visibility, _ = get_content(email_tagger, item_id)
 
     if not visibility:
-        return None, 'ContentItem is not accessible to the current tagger'
+        return False, 'ContentItem is not accessible to the current tagger'
 
     if email_tagged == email_tagger:
-        query = ('INSERT INTO Tag'
-                 '(email_tagged, email_tagger, item_id, status, tagtime)'
+        query = ('INSERT INTO Tag '
+                 '(email_tagged, email_tagger, item_id, status, tagtime) '
                  'VALUES (%s, %s, %s, TRUE, NOW())')
     else:
-        query = ('INSERT INTO Tag'
+        query = ('INSERT INTO Tag '
                  '(email_tagged, email_tagger, item_id, status, tagtime) '
                  'VALUES (%s, %s, %s, FALSE, NOW())')
 
     cursor = conn.cursor()
     cursor.execute(query, (email_tagged, email_tagger, item_id))
-    content = cursor.fetchall()
+    conn.commit()
     cursor.close()
-    return content, 'Successfully tagged ContentItem'
+    return True, 'Successfully tagged ContentItem'
 
 
 def add_friend(fname, lname, email, owner_email, fg_name): 
@@ -298,7 +297,8 @@ def filter_by_group(email, fg_name):
 
 def share_with_group(email, fg_name, item_id):
     cursor = conn.cursor()
-    insert = ('INSERT INTO Share VALUES ((SELECT owner_email from Belong WHERE email=%s), %s, %s)')
+    insert = ('INSERT INTO Share VALUES ((SELECT owner_email from Belong '
+              'WHERE email=%s), %s, %s)')
     cursor.execute(insert, (email, fg_name, item_id))
     conn.commit()
     cursor.close()
@@ -323,6 +323,58 @@ def share_with_group(email, fg_name, item_id):
 #     return status, tag
 
 
+def get_user(email):
+    cursor = conn.cursor()
+    query = 'SELECT * FROM Person WHERE email=%s'
+    cursor.execute(query, email)
+    user = cursor.fetchone()
+    cursor.close()
+    return user
+
+
+def update_user(email, new_email=None, new_first=None, new_last=None):
+    cursor = conn.cursor()
+    if new_email:
+        query = 'SELECT * FROM Person WHERE email = %s'
+        cursor.execute(query, new_email)
+        data = cursor.fetchone()
+        if data:
+            return False, "User with that email already exists"
+    parameters = ', '.join(list(filter(None, (
+        'fname=%s' if new_first else None,
+        'lname=%s' if new_last else None,
+        'email=%s' if new_email else None,
+    ))))
+    values = tuple(filter(None, (new_first, new_last, new_email, email)))
+    query = 'UPDATE Person SET ' + parameters + ' WHERE email=%s'
+    cursor.execute(query, values)
+    conn.commit()
+    cursor.close()
+    return True, 'Success'
+
+
+def remove_user_from_group(group, owner_email, email):
+    cursor = conn.cursor()
+    query = 'SELECT * FROM Friendgroup WHERE fg_name = %s AND owner_email=%s'
+    cursor.execute(query, (group, owner_email))
+    data = cursor.fetchone()
+    if not data:
+        return False, "Group Doesn't Exist"
+
+    query = 'SELECT * FROM Friendgroup WHERE fg_name = %s AND owner_email=%s'
+    cursor.execute(query, (group, email))
+    data = cursor.fetchone()
+    if data:
+        query = 'DELETE FROM Friendgroup WHERE fg_name=%s AND owner_email=%s'
+        cursor.execute(query, (group, email))
+        return True, "Success"
+
+    query = 'DELETE FROM Belong WHERE fg_name=%s AND email=%s AND owner_email=%s'
+    cursor.execute(query, (group, email, owner_email))
+    conn.commit()
+    cursor.close()
+    return True, 'Success'
+
 
 # def get_users(email):
 #     cursor = conn.cursor()
@@ -333,7 +385,6 @@ def share_with_group(email, fg_name, item_id):
 #
 #     return users
 
-
 def count_ratings_on_content(item_id):
     cursor = conn.cursor()
     query = ('SELECT count(item_id) FROM Rate WHERE ID = %s GROUP BY item_id')
@@ -341,6 +392,7 @@ def count_ratings_on_content(item_id):
     content = cursor.fetchall()
     cursor.close()
     return content, f"found rating number for item_id {item_id}"
+
 
 def add_rating(rater_email, item_id, emoji):
     cursor = conn.cursor()
@@ -350,8 +402,10 @@ def add_rating(rater_email, item_id, emoji):
     cursor.close()
     return True, "Success"
 
+
 def add_comment(commenter_email, item_id):
     pass
+
 
 def get_comments(item_id):
     pass
