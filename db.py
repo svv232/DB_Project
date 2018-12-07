@@ -103,6 +103,7 @@ def create_friend_group(owner_email, fg_name, description):
     cursor.close()
     return True, 'Successfully Created FriendGroup'
 
+
 def get_my_friend_groups(email):
     cursor = conn.cursor()
     query = ('SELECT fg_name, owner_email FROM Friendgroup WHERE '
@@ -129,19 +130,15 @@ def get_my_content_ids(email):
     return content, 'Successfully Got Content!'
 
 
-def count_tags(item_id):
+def get_tags_from_item_id(email, item_id):
     cursor = conn.cursor()
-    query = ('SELECT COUNT(*) FROM Tag WHERE item_id=%s')
-    cursor.execute(query, (item_id))
-    content = cursor.fetchall()
-    cursor.close()
-    return content, f'found tag number for item_id {item_id}'
-
-
-def get_tags_from_item_id(item_id):
-    cursor = conn.cursor()
-    query = ('SELECT * FROM Tag WHERE item_id=%s AND status')
-    cursor.execute(query, (item_id))
+    query = ('SELECT * FROM Tag WHERE item_id=%s AND status AND item_id IN '
+             '(SELECT DISTINCT item_id FROM ContentItem WHERE item_id IN '
+             '(SELECT item_id FROM Share INNER JOIN Belong ON '
+             'Belong.fg_name=Share.fg_name AND '
+             'Belong.owner_email=Share.owner_email AND Belong.email=%s) '
+             'OR is_pub OR email_post=%s)')
+    cursor.execute(query, (item_id, email, email))
     content = cursor.fetchall()
     cursor.close()
     return True, content
@@ -154,20 +151,19 @@ def get_friend_group(email, fg_name, owner):
              'WHERE owner_email=%s UNION SELECT fg_name '
              'FROM Belong WHERE email=%s)')
     cursor.execute(query, (owner, fg_name, email, email))
-    print('hello')
     content = cursor.fetchall()
     cursor.close()
-    print(content)
     return True, content[0]
+
 
 def get_emails_false_tags(email_tagged):
     cursor = conn.cursor()
-    query = ("SELECT email_tagged from Tag WHERE status=FALSE " 
-            "AND email_tagged=%s")
+    query = ("SELECT email_tagged from Tag WHERE status=FALSE "
+             "AND email_tagged=%s")
     cursor.execute(query, email_tagged)
     content = cursor.fetchall()
     cursor.close()
-    return True, f"Successfully got tags where email_tagged {email_tagged}"
+    return True, content
 
 
 def get_friend_group_members(email, owner, fg_name):
@@ -176,18 +172,15 @@ def get_friend_group_members(email, owner, fg_name):
              'AND fg_name IN (SELECT fg_name FROM Friendgroup '
              'WHERE owner_email=%s UNION SELECT fg_name '
              'FROM Belong WHERE email=%s)')
-    query = ('SELECT email FROM Belong WHERE owner_email=%s AND fg_name=%s')
-    print(owner, fg_name)
-    cursor.execute(query, (owner, fg_name))
+    cursor.execute(query, (owner, fg_name, email, email))
     content = cursor.fetchall()
     cursor.close()
-    print(content)
     return True, content
 
 
 def accept_tag_on_content_item(email_tagged, email_tagger, item_id):
     cursor = conn.cursor()
-    query = ('UPDATE Tag SET status=TRUE WHERE email_tagged=%s AND'
+    query = ('UPDATE Tag SET status=TRUE WHERE email_tagged=%s AND '
              'email_tagger=%s AND item_id=%s')
     cursor.execute(query, (email_tagged, email_tagger, item_id))
     conn.commit()
@@ -205,11 +198,43 @@ def remove_tag_on_content_item(email_tagged, email_tagger, item_id):
     return True, 'Successfully deleted content item'
 
 
-def tag_content_item(email_tagged, email_tagger, item_id):
-    visibility, _ = get_content(email_tagger, item_id)
+def tag_group_members(owner_email, fg_name, email_tagger, item_id):
+  query = ('SELECT email FROM Belong WHERE fg_name=%s AND owner_email=%s')
+  cursor = conn.cursor()
+  cursor.execute(query, (fg_name, owner_email))
+  members = cursor.fetchall()
+  print(members)
+  for member in members:
+      insert = ('INSERT INTO Tag '
+                '(email_tagged, email_tagger, item_id, status, tagtime) '
+                'VALUES(%s, %s, %s, FALSE, NOW())')
+      cursor.execute(insert, (member, email_tagger, item_id))
+  cursor.close()
+  return True, "Success"
 
-    if not visibility:
+
+def check_tagged_group_post_visibility(owner_email, fg_name, item_id):
+    query = ('SELECT email, status FROM Belong WHERE fg_name=%s AND owner_email=%s')
+    cursor = conn.cursor()
+    cursor.execute(query, (fg_name, owner_email))
+    members = cursor.fetchall()
+    group_visibility = True
+    for member in members:
+        group_visibility = group_visibility && member[0][1]
+    cursor.close()
+    return group_visibility
+
+
+def tag_content_item(email_tagged, email_tagger, item_id):
+    tagger_visible, _ = get_content(email_tagger, item_id)
+
+    if not tagger_visible:
         return False, 'ContentItem is not accessible to the current tagger'
+
+    tagged_visible, _ = get_content(email_tagged, item_id)
+
+    if not tagged_visible:
+        return False, 'ContentItem is not accessible to the tagged person'
 
     if email_tagged == email_tagger:
         query = ('INSERT INTO Tag '
@@ -232,31 +257,25 @@ def add_friend(fname, lname, email, owner_email, fg_name):
     query = ('SELECT fg_name FROM Friendgroup WHERE owner_email=%s')
     cursor.execute(query, (owner_email,))
     content = cursor.fetchall()
-    print(content)
     if len([g for g in content if g['fg_name'] == fg_name]) == 0:
-        print('Failed to insert -- not owner')
         return False, "You can only insert in groups you own"
 
     query = ('SELECT email FROM Person WHERE fname=%s AND lname=%s')
     cursor.execute(query, (fname, lname))
 
     content = cursor.fetchall()
-    print(content)
     if not len(content):
         return False, "A Person with this email does not exist"
     if len(content) > 1:
         return False, "Multiple People with this name exist"
 
-    print(content)
     new_member_email = content[0]['email']
 
     query = ("SELECT email from Belong WHERE owner_email=%s "
              "AND fg_name=%s")
     cursor.execute(query, (owner_email, fg_name))
     content = cursor.fetchall()
-    print(content)
     if len([e for e in content if e['email'] == new_member_email]):
-        print('Duplicate add')
         return False, "This Person is already in this friend group"
 
     query = ('INSERT into Belong (email, owner_email, fg_name) '
@@ -265,7 +284,6 @@ def add_friend(fname, lname, email, owner_email, fg_name):
     cursor.execute(query, (new_member_email, owner_email, fg_name))
     conn.commit()
     cursor.close()
-    print('Finished')
     return True, 'Successfully added user to friend group'
 
 
@@ -311,24 +329,6 @@ def share_with_group(email, fg_name, item_id):
     conn.commit()
     cursor.close()
     return True, "Success"
-
-
-# def get_pending_tag(user, action):
-#     cursor = conn.cursor()
-#     message = f'{action} for tag was successfully done!!'#     if action == 'accept':
-#         status, query = (''),
-#     elif action == 'decline':
-#         status, query = (''),
-#     elif action == 'remove':
-#         status, query = ('')
-#     else:
-#         message = 'An action was not decided'
-#         status, query = ('')
-#
-#     cursor.execute(query)
-#     tag = cursor.fetchall()
-#     cursor.close()
-#     return status, tag
 
 
 def get_user(email):
@@ -377,46 +377,73 @@ def remove_user_from_group(group, owner_email, email):
         cursor.execute(query, (group, email))
         return True, "Success"
 
-    query = 'DELETE FROM Belong WHERE fg_name=%s AND email=%s AND owner_email=%s'
+    query = ('DELETE FROM Belong WHERE fg_name=%s AND email=%s AND '
+             'owner_email=%s')
     cursor.execute(query, (group, email, owner_email))
     conn.commit()
     cursor.close()
     return True, 'Success'
 
 
-# def get_users(email):
-#     cursor = conn.cursor()
-#     query = 'SELECT DISTINCT email FROM blog'
-#     cursor.execute(query)
-#     users = cursor.fetchall()
-#     cursor.close()
-#
-#     return users
-
-def count_ratings_on_content(item_id):
+def ratings_on_content(email, item_id):
     cursor = conn.cursor()
-    query = ('SELECT count(item_id) FROM Rate WHERE ID = %s GROUP BY item_id')
-    cursor.execute(query, (item_id))
+    query = ('SELECT * FROM Rate WHERE item_id = %s and item_id in '
+             '(SELECT DISTINCT item_id FROM ContentItem WHERE item_id IN '
+             '(SELECT item_id FROM Share INNER JOIN Belong ON '
+             'Belong.fg_name=Share.fg_name AND '
+             'Belong.owner_email=Share.owner_email AND Belong.email=%s) '
+             'OR is_pub OR email_post=%s)')
+    cursor.execute(query, (item_id, email, email))
     content = cursor.fetchall()
     cursor.close()
-    return content, f"found rating number for item_id {item_id}"
+    return True, content
 
 
 def add_rating(rater_email, item_id, emoji):
     cursor = conn.cursor()
-    query = ('INSERT INTO Rate VALUES(%s, %s, NOW(), %s)')
-    cursor.execute(query, (rater_email, item_id, emoji))
+    check = ('SELECT emoji FROM Rate WHERE item_id =%s and email=%s')
+    cursor.execute(check, (item_id, rater_email))
+    content = cursor.fetchall()
+    print(content)
+    if not len(content):
+        query = ('INSERT INTO Rate '
+                 '(email, item_id, rate_time, emoji) '
+                 'VALUES(%s, %s, NOW(), %s)')
+        cursor.execute(query, (rater_email, item_id, emoji))
+    else:
+        query = ('UPDATE Rate SET emoji=%s WHERE item_id=%s')
+        cursor.execute(query, (emoji, item_id))
     conn.commit()
     cursor.close()
     return True, "Success"
 
 
-def add_comment(commenter_email, item_id):
-    pass
+def add_comment(item_id, comment, commenter_email):
+    # First check if item_id is actually visible to the commenter
+    # First result of get_content is the status
+    #   (whether it found anything or not)
+    visible, _ = get_content(commenter_email, item_id)
 
+    # Return if item_id is not visible
+    if not visible:
+        return False, 'ContentItem is not accessible to the current commenter'
 
-def get_comments(item_id):
-    pass
+    # Ensure that comment is not greater than DB VARCHAR
+    if len(comment) > 256:
+        return False, 'Comment is too long'
+
+    # Execute the INSERT query
+    cursor = conn.cursor()
+    query = ('INSERT INTO Comment '
+             '(item_id, comment, commenter_email, comment_time)'
+             'VALUES(%s, %s, %s, NOW())')
+    cursor.execute(query, (item_id, comment, commenter_email))
+    conn.commit()
+    cursor.close()
+
+    # Should always work since error checks prior
+    return True, "Success"
+
 
 def create_best_friends_group(owner_email):
     res, _ = check_for_best_friends(owner_email)
@@ -454,3 +481,19 @@ def get_best_friends(email):
     _, best_friend_group = get_my_best_friend_group(email)
     res, members = get_friend_group_members(email, email, best_friend_group[0]['fg_name'])
     return res, members
+
+def get_comments(item_id, email):
+    # Get comments but also check that item_id is visible to the user
+    cursor = conn.cursor()
+    query = ('SELECT * FROM Comment WHERE item_id=%s AND item_id IN '
+             '(SELECT DISTINCT item_id FROM ContentItem WHERE item_id IN '
+             '(SELECT item_id FROM Share INNER JOIN Belong ON '
+             'Belong.fg_name=Share.fg_name AND '
+             'Belong.owner_email=Share.owner_email AND Belong.email=%s) '
+             'OR is_pub OR email_post=%s) ORDER BY comment_time DESC')
+    cursor.execute(query, (item_id, email, email))
+    content = cursor.fetchall()
+    cursor.close()
+
+    # Should always work, returns nothing in content if nothing found
+    return True, content

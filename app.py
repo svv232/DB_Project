@@ -4,9 +4,10 @@ from db import create_friend_group, get_my_content, get_my_friend_groups
 from db import get_content, get_friend_group, add_friend, get_my_tags
 from db import tag_content_item, remove_tag_on_content_item
 from db import accept_tag_on_content_item, get_friend_group_members
-from db import get_tags_from_item_id, count_ratings_on_content, add_rating
+from db import get_tags_from_item_id, ratings_on_content, add_rating
 from db import get_user, update_user, remove_user_from_group, share_with_group
 from db import get_best_friends
+from db import add_comment, get_comments
 from utilities import login_required
 
 import os
@@ -89,17 +90,16 @@ def post():
     private = request.form.get('private')
     if private == 'True':
         share = request.form.get('share')
-        print("Share initially is :", share)
         if share and share != '':
             share = share.split(',')
             share = [x.split(':') for x in share]
-            print("Share is now: ", share)
         private = True
     elif private == 'False':
         private = False
     success, id, msg = post_content(email, title, post, not private)
-    print("Share is:", share)
-    share_with_group(share[0][1], share[0][0], id)
+
+    if private:
+        share_with_group(share[0][1], share[0][0], id)
     return redirect('/')
 
 
@@ -122,13 +122,34 @@ def get_posts():
     pass
 
 
+@app.route('/rate')
+@login_required
 def rate():
-    # Optional Feature 1 (Person 2)
-    # Modify db.py
-    # Idk add rating also would like query to get number of rates by item_id
-    # Return Value: Success or Error Message
-    # i.e. (True, 'Success') or (False, 'Post does not exist')
-    pass
+    item_id = request.args['item_id']
+    emoji = request.args['emoji']
+    if emoji == '0':
+        emoji = '👍'
+    elif emoji == '1':
+        emoji = '😮'
+    elif emoji == '2':
+        emoji = '😥'
+    elif emoji == '3':
+        emoji = '😡'
+    elif emoji == '4':
+        emoji = '😂'
+
+    add_rating(session['email'], item_id, emoji)
+    return redirect('/')
+
+
+@app.route('/rate/get', methods=['POST'])
+@login_required
+def ratings():
+    item_id = request.get_json().get('item_id')
+    _, content = ratings_on_content(session['email'], item_id)
+    for rate in content:
+        rate['rate_time'] = str(rate['rate_time'])
+    return json.dumps(content)
 
 
 @app.route('/tag', methods=['POST'])
@@ -144,12 +165,18 @@ def tag():
     # i.e. (True, 'Success') or (False, 'Post does not exist')
     return redirect('/')
 
+def tag_group():
+    item_id = request.form.get('item_id')
+    group_tagged = request.form.get('tagged_group')
+    owner_email = request.form.get('owner_email')
+    tag_group_members(owner_email, group_tagged, session['email'], item_id)
+    return redirect('/')
 
 @app.route('/tag/get', methods=['POST'])
 @login_required
 def get_tag():
     item_id = request.get_json().get('item_id')
-    _, content = get_tags_from_item_id(item_id)
+    err, content = get_tags_from_item_id(session['email'], item_id)
     for tag in content:
         tag['tagtime'] = str(tag['tagtime'])
     # Optional Feature 4 (tag group) (Person 2)
@@ -176,9 +203,47 @@ def accept_tag():
     return redirect('/')
 
 
+@app.route('/comment/get', methods=['POST'])
+@login_required
+def get_comment():
+    # Login required decorator ensures only logged in users can get comments
+    # Async request from JavaScript to fetch this info
+    # Request sends item_id of post to fetch comments for as json
+    item_id = request.get_json().get('item_id')
+
+    # First return value is status code which we don't need outside of debug
+    # situations. Mostly following convention here.
+    _, content = get_comments(item_id, session['email'])
+
+    # Content is the results of the query
+    # If no comments then empty JSON array is sent
+    for comment in content:
+        # Datetime cannot be json serialized
+        # First convert all datetimes to strings
+        comment['comment_time'] = str(comment['comment_time'])
+
+    # Return back comments as JSON
+    return json.dumps(content)
+
+
+@app.route('/comment', methods=['POST'])
+@login_required
 def comment():
-    # Optional Feature 2 (Roy)
-    pass
+    # Post a comment
+    # Form on page sends over the appropriate fields
+    item_id = request.form['item_id']
+    comment = request.form['comment']
+
+    # Don't really care for success values of commenting
+    # If user tries to cheat and send random item_id, the add_comment function
+    # will handle it
+    # Nothing will happen if item_id is not visible to commenter, which is fine
+    # because if users follows the rules it should work fine
+    # Users not following the rules will not break the database
+    add_comment(item_id, comment, session['email'])
+
+    # Just redirect to index page
+    return redirect('/')
 
 
 @app.route('/group/create', methods=['POST'])
@@ -205,7 +270,6 @@ def get_group_members():
     fg_name = request.get_json().get('fg_name')
     owner = request.get_json().get('owner_email')
     _, content = get_friend_group_members(session['email'], owner, fg_name)
-    print(content)
     return json.dumps(content)
 
 
@@ -225,7 +289,8 @@ def invite_group():
 def leave_group():
     group = request.form['fg_name']
     owner_email = request.form['owner_email']
-    remove_user_from_group(group=group, owner_email=owner_email, email=session['email'])
+    remove_user_from_group(
+        group=group, owner_email=owner_email, email=session['email'])
     return redirect('/')
 
 
@@ -251,11 +316,15 @@ def edit_profile():
     db_first = user['fname']
     db_last = user['lname']
 
-    new_email = request.form.get('email') if request.form.get('email') != db_email else None
-    new_first = request.form.get('fname') if request.form.get('fname') != db_first else None
-    new_last = request.form.get('lname') if request.form.get('lname') != db_last else None
+    new_email = request.form.get('email') if request.form.get(
+        'email') != db_email else None
+    new_first = request.form.get('fname') if request.form.get(
+        'fname') != db_first else None
+    new_last = request.form.get('lname') if request.form.get(
+        'lname') != db_last else None
 
-    status = update_user(db_email, new_email=new_email, new_first=new_first, new_last=new_last)
+    status = update_user(db_email, new_email=new_email,
+                         new_first=new_first, new_last=new_last)
 
     if status[0]:
         if new_email:
@@ -275,6 +344,6 @@ def page_not_found(e):
     return render_template('404.html'), 404
 
 
-app.secret_key = os.urandom(24)
+app.secret_key = 'keyboardcat'
 if __name__ == '__main__':
     app.run('0.0.0.0', 5000, debug=True)

@@ -29,12 +29,6 @@
     <div class="col-sm-3">
       <div class="neko-card">
 				{% if email %}
-                    <style>
-                        #profile-card:hover {
-                            cursor: pointer;
-                            background-color: #f5f8fa;
-                        }
-                    </style>
 					<div id="profile-card" data-toggle="modal" data-target="#userModal">
 						<div id="bg-picture"></div>
 						<div id="profile-info-container">
@@ -157,11 +151,6 @@
                       <br>
                       <span class="users-tag">{{ group.owner_email }}</span>
                     </div>
-                    <form method="POST" action="group/leave">
-                          <input type="hidden" value="{{ group.fg_name }}" name="fg_name" id="fg_name">
-                          <input type="hidden" value="{{ group.owner_email }}" name="owner_email" id="owner_email">
-                          <button type="submit" class="float-right">Leave {{ group.fg_name }}</button>
-                      </form>
                   </div>
                 </div>
               </div>
@@ -172,7 +161,7 @@
       </div>
       <br>
       <div class="neko-card">
-        <div id="users-container">
+        <div id="tag-container">
           <h1>Pending Tags</h1>
           <ul id="tag-list">
             {% if not tags %}
@@ -187,7 +176,12 @@
               <div class="tag-card container-fluid">
                 <div class="row">
                   <div class="col-sm-12">
-                    email tagged you in item name
+                    <a class="close" href="tag/review?item_id={{ tag['item_id'] }}&email_tagger={{ tag['email_tagger'] }}&status=delete">
+                      <span aria-hidden="true">&times;</span>
+                    </a>
+                    <span class="users-user">{{ tag['email_tagger'] }}</span><span> in post </span><span class="tag-item">{{ tag['item_id'] }}</span>
+                    <br>
+                    <a class="tag-accept" href="tag/review?item_id={{ tag['item_id'] }}&email_tagger={{ tag['email_tagger'] }}&status=accept">accept</a><span class="post-time">{{ tag['tagtime'] }}</span>
                   </div>
                 </div>
               </div>
@@ -228,9 +222,9 @@
             <div class="row">
               <div class="col-sm-12">
                 <div class="post-tagged">
-                  <span id="postTag" class="bold" post-id="">5 <span>Tags</span></span>
+                  <span id="postTag" class="bold" post-id="">5<span> Tags</span></span>
                   <span class="space"></span>
-                  <span id="postRate" class="bold" post-id="">5 <span>Rates</span></span>
+                  <span id="postRate" class="bold" post-id="">5<span> Rates</span></span>
                 </div>
               </div>
             </div>
@@ -251,10 +245,12 @@
                     </div>
                     <div class="dropdown">
                       <button id="rateButton" type="button" class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span data-toggle="popover" data-placement="top" data-content="Rate" data-container="body"><i class="far fa-grin"></i></span></button>
-                      <div class="dropdown-menu" aria-labelledby="rateButton">
-                          <a class="dropdown-item" href="#">Action</a>
-                          <a class="dropdown-item" href="#">Another action</a>
-                          <a class="dropdown-item" href="#">Something else here</a>
+                      <div class="dropdown-menu emoji-container" aria-labelledby="rateButton">
+                          <a class="dropdown-item emoji-link" href="rate?emoji=0&item_id=">👍</a>
+                          <a class="dropdown-item emoji-link" href="rate?emoji=1&item_id=">😮</a>
+                          <a class="dropdown-item emoji-link" href="rate?emoji=2&item_id=">😥</a>
+                          <a class="dropdown-item emoji-link" href="rate?emoji=3&item_id=">😡</a>
+                          <a class="dropdown-item emoji-link" href="rate?emoji=4&item_id=">😂</a>
                       </div>
                     </div>
                     <button id="commentButton" type="button" class="btn" data-container="body" data-toggle="popover" data-placement="top" data-content="Comment"><i class="far fa-comment"></i></button>
@@ -269,15 +265,7 @@
         </div>
         <div class="container-fluid">
           <div class="row">
-            <ul class="post-comments">
-              <li>
-                <div class="post-info">
-                  <span class="post-user">Full Name</span><span class="post-tag"> • </span><span class="post-tag"> EMAIL </span>
-                </div>
-                <p>
-                  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-                </p>
-              </li>
+            <ul id="postComments" class="post-comments">
             </ul>
           </div>
         </div>
@@ -285,7 +273,8 @@
           <div class="row">
             <div class="col-sm-12">
               <textarea id="postCommentForm" placeholder="Comment" class="comment-text" name="comment" form="comment-form"></textarea>
-              <form id="comment-form" action="post" method="POST">
+              <form id="comment-form" action="comment" method="POST">
+                <input id="commentId" type="hidden" value="" name="item_id">
                 <button type="submit" class="meow btn comment-button">Meow</button>
               </form>
             </div>
@@ -331,7 +320,15 @@
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
-                <h1 id="groupFriendName" class="friend-header">Friend Group Name <span class="users-verified"><i class="fas fa-paw"></i></span></h1>
+                <h1 id="groupFriendName" class="friend-header">
+                  Friend Group Name
+                </h1>
+                <form method="POST" action="group/leave" class="leave-form">
+                    <input id="leaveGroup" type="hidden" value="" name="fg_name">
+                    <input id="leaveOwner" type="hidden" value="" name="owner_email">
+                    <button type="submit" class="">Leave</button>
+                </form>
+                <br>
                 <span id="groupFriendOwner" class="friend-owner">owner_email</span>
                 <p id="groupFriendDesc">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
@@ -391,7 +388,7 @@
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
-              <h1 class="friend-header">Tagged</h1>
+              <h1 class="friend-header">Rated</h1>
               <ul id="rateList">
               </ul>
             </div>
