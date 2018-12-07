@@ -29,7 +29,7 @@ Array.from(posts).forEach(function(element) {
   });
 });
 
-let groups = document.getElementsByClassName('users-card');
+let groups = document.getElementsByClassName('users-info');
 
 Array.from(groups).forEach(function(element) {
   element.addEventListener('click', function(e) {
