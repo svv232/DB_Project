@@ -106,7 +106,7 @@ def create_friend_group(owner_email, fg_name, description):
 def get_my_friend_groups(email):
     cursor = conn.cursor()
     query = ('SELECT fg_name, owner_email FROM Friendgroup WHERE '
-             'owner_email=%s UNION SELECT fg_name, owner_email '
+             'AND owner_email=%s UNION SELECT fg_name, owner_email '
              'FROM Belong WHERE email=%s')
     cursor.execute(query, (email, email))
     content = cursor.fetchall()
@@ -417,3 +417,40 @@ def add_comment(commenter_email, item_id):
 
 def get_comments(item_id):
     pass
+
+def create_best_friends_group(owner_email):
+    res, _ = check_for_best_friends(owner_email)
+    if not res:
+        cursor = conn.cursor()
+        query = ('INSERT INTO Friendgroup'
+                 '(owner_email, fg_name, description, best_friend) VALUES (%s, %s, %s, TRUE)')
+
+        cursor.execute(query, (owner_email, "Best Friends" , "BEST_FRIENDS_GROUP"))
+        conn.commit()
+        cursor.close()
+    return True, "Success"
+
+def check_for_best_friends(owner_email):
+    query = 'SELECT * FROM Friendgroup WHERE owner_email=%s AND best_friend=TRUE'
+    result = cursor.fetchone(query, (owner_email))
+    cursor.close()
+    exists = result is not None
+    message = "Best friends group does not exist" 
+    if exists:
+        message = "Success"
+    return exists, message
+
+def get_my_best_friend_group(email):
+    cursor = conn.cursor()
+    query = ('SELECT fg_name, owner_email FROM Friendgroup WHERE '
+             '(owner_email=%s AND best_friend=TRUE) UNION SELECT fg_name, owner_email '
+             'FROM Belong WHERE email=%s')
+    cursor.execute(query, (email, email))
+    content = cursor.fetchall()
+    cursor.close()
+    return True, content
+
+def get_best_friends(email):
+    _, best_friend_group = get_my_best_friend_group(email)
+    res, members = get_friend_group_members(email, email, best_friend_group[0]['fg_name'])
+    return res, members

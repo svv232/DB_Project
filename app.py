@@ -6,6 +6,7 @@ from db import tag_content_item, remove_tag_on_content_item
 from db import accept_tag_on_content_item, get_friend_group_members
 from db import get_tags_from_item_id, count_ratings_on_content, add_rating
 from db import get_user, update_user, remove_user_from_group, share_with_group
+from db import get_best_friends
 from utilities import login_required
 
 import os
@@ -23,6 +24,7 @@ def index():
     _, posts = get_my_content(session['email'])
     _, groups = get_my_friend_groups(session['email'])
     _, tags = get_my_tags(session['email'])
+    _, best_friends = get_best_friends(session['email'])
     return render_template('index.html', email=session['email'],
                            fname=session['fname'], lname=session['lname'],
                            posts=posts, groups=groups, tags=tags)

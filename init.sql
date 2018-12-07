@@ -10,6 +10,7 @@ CREATE TABLE Friendgroup (
     owner_email VARCHAR(20),
     fg_name VARCHAR(20),
     description VARCHAR(1000),
+    best_friend BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (owner_email, fg_name),
     FOREIGN KEY (owner_email) REFERENCES Person(email) ON UPDATE CASCADE ON DELETE CASCADE
 );
