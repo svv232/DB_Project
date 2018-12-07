@@ -87,7 +87,7 @@ def post():
     private = request.form.get('private')
     if private == 'True':
         share = request.form.get('share')
-        if share != '':
+        if share and share != '':
             share = share.split(',')
             share = [x.split(':') for x in share]
         private = True
@@ -129,7 +129,7 @@ def rate():
 @login_required
 def tag():
     item_id = request.form.get('item_id')
-    email_tagged = request.form.get('tagged_email')
+    email_tagged = request.form.get('tagged-email')
     tag_content_item(email_tagged, session['email'], item_id)
     # Optional Feature 4 (tag group) (Person 2)
     # Modify db.py
@@ -144,6 +144,8 @@ def tag():
 def get_tag():
     item_id = request.get_json().get('item_id')
     _, content = get_tags_from_item_id(item_id)
+    for tag in content:
+        tag['tagtime'] = str(tag['tagtime'])
     # Optional Feature 4 (tag group) (Person 2)
     # Modify db.py
     # Idk add tagging groups
