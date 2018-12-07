@@ -141,7 +141,7 @@ def count_tags(item_id):
 
 def get_tags_from_item_id(item_id):
     cursor = conn.cursor()
-    query = ('SELECT * FROM Tag WHERE item_id=%s')
+    query = ('SELECT * FROM Tag WHERE item_id=%s AND status')
     cursor.execute(query, (item_id))
     content = cursor.fetchall()
     cursor.close()
