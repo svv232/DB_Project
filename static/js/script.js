@@ -44,35 +44,34 @@ Array.from(groups).forEach(function(element) {
     }).then(function(response) {
       return response.json();
     })
-    .then(function(content) {
+    .then(content => {
       document.getElementById('groupFriendName').innerHTML = content['fg_name'];
       document.getElementById('groupFriendOwner').innerHTML = content['owner_email'];
       document.getElementById('groupFriendDesc').innerHTML = content['description'];
       document.getElementById('groupFriendNameInput').value = content['fg_name'];
       document.getElementById('groupFriendOwnerInput').value = content['owner_email'];
-      $('#groupModal').modal('show');
-    });
-
-    fetch('http://localhost:5000/group/members', {
-      method: 'POST',
-      body: JSON.stringify({fg_name: this.getElementsByClassName('users-user')[0].innerHTML,
-                            owner_email: this.getElementsByClassName('users-tag')[0].innerHTML}),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).then(function(response) {
-      return response.json();
-    })
-    .then(function(content) {
-      if (content.length > 0) {
-        document.getElementById('groupFriendMembers').innerHTML = ''
-        for (member in content) {
-          document.getElementById('groupFriendMembers').innerHTML += '<li>' + content[member]['email'] + '</li>'
+      fetch('http://localhost:5000/group/members', {
+        method: 'POST',
+        body: JSON.stringify({fg_name: this.getElementsByClassName('users-user')[0].innerHTML,
+                              owner_email: this.getElementsByClassName('users-tag')[0].innerHTML}),
+        headers: {
+          'Content-Type': 'application/json'
         }
-      } else {
+      }).then(function(response) {
+        return response.json();
+      })
+      .then(function(content) {
+        if (content.length > 0) {
+          document.getElementById('groupFriendMembers').innerHTML = ''
+          for (member in content) {
+            document.getElementById('groupFriendMembers').innerHTML += '<li>' + content[member]['email'] + '</li>'
+          }
+        } else {
 
-      document.getElementById('groupFriendMembers').innerHTML = '<li>No members 😥</li>';
-      }
+        document.getElementById('groupFriendMembers').innerHTML = '<li>No members 😥</li>';
+        }
+        $('#groupModal').modal('show');
+      });
     });
   });
 });

@@ -103,6 +103,7 @@ def create_friend_group(owner_email, fg_name, description):
     cursor.close()
     return True, 'Successfully Created FriendGroup'
 
+
 def get_my_friend_groups(email):
     cursor = conn.cursor()
     query = ('SELECT fg_name, owner_email FROM Friendgroup WHERE '
@@ -154,20 +155,19 @@ def get_friend_group(email, fg_name, owner):
              'WHERE owner_email=%s UNION SELECT fg_name '
              'FROM Belong WHERE email=%s)')
     cursor.execute(query, (owner, fg_name, email, email))
-    print('hello')
     content = cursor.fetchall()
     cursor.close()
-    print(content)
     return True, content[0]
+
 
 def get_emails_false_tags(email_tagged):
     cursor = conn.cursor()
-    query = ("SELECT email_tagged from Tag WHERE status=FALSE " 
-            "AND email_tagged=%s")
+    query = ("SELECT email_tagged from Tag WHERE status=FALSE "
+             "AND email_tagged=%s")
     cursor.execute(query, email_tagged)
     content = cursor.fetchall()
     cursor.close()
-    return True, f"Successfully got tags where email_tagged {email_tagged}"
+    return True, content
 
 
 def get_friend_group_members(email, owner, fg_name):
@@ -176,12 +176,9 @@ def get_friend_group_members(email, owner, fg_name):
              'AND fg_name IN (SELECT fg_name FROM Friendgroup '
              'WHERE owner_email=%s UNION SELECT fg_name '
              'FROM Belong WHERE email=%s)')
-    query = ('SELECT email FROM Belong WHERE owner_email=%s AND fg_name=%s')
-    print(owner, fg_name)
-    cursor.execute(query, (owner, fg_name))
+    cursor.execute(query, (owner, fg_name, email, email))
     content = cursor.fetchall()
     cursor.close()
-    print(content)
     return True, content
 
 
@@ -313,24 +310,6 @@ def share_with_group(email, fg_name, item_id):
     return True, "Success"
 
 
-# def get_pending_tag(user, action):
-#     cursor = conn.cursor()
-#     message = f'{action} for tag was successfully done!!'#     if action == 'accept':
-#         status, query = (''),
-#     elif action == 'decline':
-#         status, query = (''),
-#     elif action == 'remove':
-#         status, query = ('')
-#     else:
-#         message = 'An action was not decided'
-#         status, query = ('')
-#
-#     cursor.execute(query)
-#     tag = cursor.fetchall()
-#     cursor.close()
-#     return status, tag
-
-
 def get_user(email):
     cursor = conn.cursor()
     query = 'SELECT * FROM Person WHERE email=%s'
@@ -377,21 +356,13 @@ def remove_user_from_group(group, owner_email, email):
         cursor.execute(query, (group, email))
         return True, "Success"
 
-    query = 'DELETE FROM Belong WHERE fg_name=%s AND email=%s AND owner_email=%s'
+    query = ('DELETE FROM Belong WHERE fg_name=%s AND email=%s AND '
+             'owner_email=%s')
     cursor.execute(query, (group, email, owner_email))
     conn.commit()
     cursor.close()
     return True, 'Success'
 
-
-# def get_users(email):
-#     cursor = conn.cursor()
-#     query = 'SELECT DISTINCT email FROM blog'
-#     cursor.execute(query)
-#     users = cursor.fetchall()
-#     cursor.close()
-#
-#     return users
 
 def count_ratings_on_content(item_id):
     cursor = conn.cursor()

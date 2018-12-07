@@ -87,17 +87,16 @@ def post():
     private = request.form.get('private')
     if private == 'True':
         share = request.form.get('share')
-        print("Share initially is :", share)
         if share and share != '':
             share = share.split(',')
             share = [x.split(':') for x in share]
-            print("Share is now: ", share)
         private = True
     elif private == 'False':
         private = False
     success, id, msg = post_content(email, title, post, not private)
-    print("Share is:", share)
-    share_with_group(share[0][1], share[0][0], id)
+
+    if private == 'True':
+        share_with_group(share[0][1], share[0][0], id)
     return redirect('/')
 
 
@@ -203,7 +202,6 @@ def get_group_members():
     fg_name = request.get_json().get('fg_name')
     owner = request.get_json().get('owner_email')
     _, content = get_friend_group_members(session['email'], owner, fg_name)
-    print(content)
     return json.dumps(content)
 
 
@@ -273,6 +271,6 @@ def page_not_found(e):
     return render_template('404.html'), 404
 
 
-app.secret_key = os.urandom(24)
+app.secret_key = 'keyboardcat'
 if __name__ == '__main__':
     app.run('0.0.0.0', 5000, debug=True)

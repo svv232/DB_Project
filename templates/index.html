@@ -29,12 +29,6 @@
     <div class="col-sm-3">
       <div class="neko-card">
 				{% if email %}
-                    <style>
-                        #profile-card:hover {
-                            cursor: pointer;
-                            background-color: #f5f8fa;
-                        }
-                    </style>
 					<div id="profile-card" data-toggle="modal" data-target="#userModal">
 						<div id="bg-picture"></div>
 						<div id="profile-info-container">
@@ -154,14 +148,14 @@
                       {% if group.owner_email == email %}
                         <span class="users-verified"><i class="fas fa-paw"></i></span>
                       {% endif %}
+                      <form method="POST" action="group/leave" class="leave-form">
+                          <input type="hidden" value="{{ group.fg_name }}" name="fg_name" id="fg_name">
+                          <input type="hidden" value="{{ group.owner_email }}" name="owner_email" id="owner_email">
+                          <button type="submit" class="float-right">Leave</button>
+                      </form>
                       <br>
                       <span class="users-tag">{{ group.owner_email }}</span>
                     </div>
-                    <form method="POST" action="group/leave">
-                          <input type="hidden" value="{{ group.fg_name }}" name="fg_name" id="fg_name">
-                          <input type="hidden" value="{{ group.owner_email }}" name="owner_email" id="owner_email">
-                          <button type="submit" class="float-right">Leave {{ group.fg_name }}</button>
-                      </form>
                   </div>
                 </div>
               </div>

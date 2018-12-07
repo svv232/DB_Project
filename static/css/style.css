@@ -6,7 +6,7 @@ body, input {
   font-family: 'Helvetica Neue', Arial, sans-serif !important;
 }
 
-.btn:focus {
+button:focus {
   outline: none !important;
   box-shadow: none !important;
 }
@@ -748,4 +748,26 @@ textarea:focus {
 
 .privacyGroup:active {
   color: black !important;
+}
+
+#profile-card:hover {
+    cursor: pointer;
+    background-color: #f5f8fa;
+}
+
+.leave-form {
+  display: inline-block;
+}
+
+.leave-form button {
+  font-size: 12px;
+  border: 0;
+  color: #1DA1F2;
+  background-color: transparent;
+}
+
+.leave-form button:hover {
+  background-color: transparent;
+  text-decoration: underline;
+  cursor: pointer;
 }
