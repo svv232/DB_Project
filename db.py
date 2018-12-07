@@ -358,10 +358,15 @@ def remove_user_from_group(group, owner_email, email):
     return True, 'Success'
 
 
-def ratings_on_content(item_id):
+def ratings_on_content(email, item_id):
     cursor = conn.cursor()
-    query = ('SELECT * FROM Rate WHERE item_id = %s')
-    cursor.execute(query, (item_id))
+    query = ('SELECT * FROM Rate WHERE itemd_id = %s and item_id in '
+    '(SELECT item_id FROM Share INNER JOIN Belong ON '
+    'Belong.fg_name=Share.fg_name AND '
+    'Belong.owner_email=Share.owner_email AND Belong.email=%s) '
+    'OR is_pub OR email_post=%s)'
+    )
+    cursor.execute(query, (item_id, email, email))
     content = cursor.fetchall()
     cursor.close()
     return True, content

@@ -142,7 +142,7 @@ def rate():
 
 @app.route('/rate/get', methods=['POST'])
 @login_required
-def comments():
+def ratings():
     item_id = request.get_json().get('item_id')
     _, content = ratings_on_content(item_id, session['email'])
     return json.dumps(content)
