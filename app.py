@@ -5,6 +5,7 @@ from db import get_content, get_friend_group, add_friend, get_my_tags
 from db import tag_content_item, remove_tag_on_content_item
 from db import accept_tag_on_content_item, get_friend_group_members
 from db import get_tags_from_item_id, count_ratings_on_content, add_rating
+from db import get_user, update_user, remove_user_from_group
 from utilities import login_required
 
 import os
@@ -215,14 +216,10 @@ def invite_group():
 @app.route('/group/leave', methods=['POST'])
 @login_required
 def leave_group():
-    fg_name = request.form['fg_name']
+    group = request.form['fg_name']
     owner_email = request.form['owner_email']
-    # Optional Feature 3 (Oskar)
-    # Remove from Belongs Table
-    # Modify db.py
-    # Return Value: Success or Error Message
-    # i.e. (True, 'Success') or (False, 'Group Doesn't Exist')
-    pass
+    remove_user_from_group(group=group, owner_email=owner_email, email=session['email'])
+    return redirect('/')
 
 
 @app.route('/group/best', methods=['POST'])
@@ -239,24 +236,31 @@ def best_group():
     pass
 
 
-@app.route('/profile', methods=['GET', 'POST'])
+@app.route('/profile', methods=['POST'])
 @login_required
-def profile():
-    if request.method == 'GET':
-        return render_template('profile.html', fname=session['fname'],
-                               lname=session['lname'], email=session['email'])
+def edit_profile():
+    user = get_user(session['email'])
+    db_email = user['email']
+    db_first = user['fname']
+    db_last = user['lname']
 
-    email = request.form['email']
-    fname = request.form['fname']
-    lname = request.form['lname']
-    # Optional Feature 5 (Oskar)
-    # Update Queries for User
-    # Modify db.py
-    # Assume params are accurate
-    #   (if not changing fname, it'll be original fname)
-    # Return Value: Success or Error Message
-    # i.e. (True, 'Success') or (False, 'Email already exists')
-    pass
+    new_email = request.form.get('email') if request.form.get('email') != db_email else None
+    new_first = request.form.get('fname') if request.form.get('fname') != db_first else None
+    new_last = request.form.get('lname') if request.form.get('lname') != db_last else None
+
+    status = update_user(db_email, new_email=new_email, new_first=new_first, new_last=new_last)
+
+    if status[0]:
+        if new_email:
+            user = get_user(new_email)
+        else:
+            user = get_user(session['email'])
+
+        session['email'] = user['email']
+        session['fname'] = user['fname']
+        session['lname'] = user['lname']
+
+    return redirect('/')
 
 
 @app.errorhandler(404)

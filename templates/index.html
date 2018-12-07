@@ -17,7 +17,6 @@
 	          <a class="dropdown-item" href="/login">Login</a>
 						<a class="dropdown-item" href="/register">Register</a>
 					{% else %}
-            <a class="dropdown-item" href="/profile">Profile</a>
 						<a class="dropdown-item" href="/logout">Logout</a>
 					{% endif %}
         </div>
@@ -30,7 +29,13 @@
     <div class="col-sm-3">
       <div class="neko-card">
 				{% if email %}
-					<div id="profile-card">
+                    <style>
+                        #profile-card:hover {
+                            cursor: pointer;
+                            background-color: #f5f8fa;
+                        }
+                    </style>
+					<div id="profile-card" data-toggle="modal" data-target="#userModal">
 						<div id="bg-picture"></div>
 						<div id="profile-info-container">
 							<div id="profile-picture"><i class="fas fa-user"></i></div>
@@ -390,6 +395,37 @@
       </div>
     </div>
   </div>
+</div>
+
+<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div>
+                                <h3>Update Profile Information</h3>
+                                <p class="login-error">{{ error }}</p>
+                                <form method="POST" action="profile">
+                                    <div class="form-group">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="fname" placeholder="First Name" name="fname" value="{{ fname }}">
+                                            <input type="text" class="form-control" id="lname" placeholder="Last Name" name="lname" value="{{ lname }}">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="email" class="form-control" id="email" placeholder="Email" name="email" value="{{ email }}">
+                                    </div>
+                                    <button type="submit" class="btn meow">Update</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 

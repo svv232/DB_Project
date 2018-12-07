@@ -305,6 +305,60 @@ def share_with_group(email, fg_name, item_id):
 #     cursor.close()
 #     return status, tag
 
+
+def get_user(email):
+    cursor = conn.cursor()
+    query = 'SELECT * FROM Person WHERE email=%s'
+    cursor.execute(query, email)
+    user = cursor.fetchone()
+    cursor.close()
+    return user
+
+
+def update_user(email, new_email=None, new_first=None, new_last=None):
+    cursor = conn.cursor()
+    if new_email:
+        query = 'SELECT * FROM Person WHERE email = %s'
+        cursor.execute(query, new_email)
+        data = cursor.fetchone()
+        if data:
+            return False, "User with that email already exists"
+    parameters = ', '.join(list(filter(None, (
+        'fname=%s' if new_first else None,
+        'lname=%s' if new_last else None,
+        'email=%s' if new_email else None,
+    ))))
+    values = tuple(filter(None, (new_first, new_last, new_email, email)))
+    query = 'UPDATE Person SET ' + parameters + ' WHERE email=%s'
+    cursor.execute(query, values)
+    conn.commit()
+    cursor.close()
+    return True, 'Success'
+
+
+def remove_user_from_group(group, owner_email, email):
+    cursor = conn.cursor()
+    query = 'SELECT * FROM Friendgroup WHERE fg_name = %s AND owner_email=%s'
+    cursor.execute(query, (group, owner_email))
+    data = cursor.fetchone()
+    if not data:
+        return False, "Group Doesn't Exist"
+
+    query = 'SELECT * FROM Friendgroup WHERE fg_name = %s AND owner_email=%s'
+    cursor.execute(query, (group, email))
+    data = cursor.fetchone()
+    if data:
+        query = 'DELETE FROM Friendgroup WHERE fg_name=%s AND owner_email=%s'
+        cursor.execute(query, (group, email))
+        return True, "Success"
+
+    query = 'DELETE FROM Belong WHERE fg_name=%s AND email=%s AND owner_email=%s'
+    cursor.execute(query, (group, email, owner_email))
+    conn.commit()
+    cursor.close()
+    return True, 'Success'
+
+
 # def get_users(email):
 #     cursor = conn.cursor()
 #     query = 'SELECT DISTINCT email FROM blog'
