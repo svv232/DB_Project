@@ -120,12 +120,14 @@ def get_posts():
 
 
 def rate():
-    # Optional Feature 1 (Person 2)
     # Modify db.py
-    # Idk add rating also would like query to get number of rates by item_id
+    # add rating also would like query to get number of rates by item_id
     # Return Value: Success or Error Message
-    # i.e. (True, 'Success') or (False, 'Post does not exist')
-    pass
+    email = session['email']
+    item_id = request.form.get('item_id')
+    emoji = request.form.get('emoji')
+    add_rating(email, item_id, emoji)
+    return redirect('/')
 
 
 @app.route('/tag', methods=['POST'])
