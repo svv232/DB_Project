@@ -4,7 +4,7 @@ from db import create_friend_group, get_my_content, get_my_friend_groups
 from db import get_content, get_friend_group, add_friend, get_my_tags
 from db import tag_content_item, remove_tag_on_content_item
 from db import accept_tag_on_content_item, get_friend_group_members
-from db import get_tags_from_item_id
+from db import get_tags_from_item_id, count_ratings_on_content, add_rating
 from utilities import login_required
 
 import os
