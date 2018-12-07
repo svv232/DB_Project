@@ -1,22 +1,31 @@
 from flask import Flask, render_template, request, session, url_for, redirect
-from db import login_user, register_user, get_public_content, post_content, get_user, update_user, remove_user_from_group
+from db import login_user, register_user, get_public_content, post_content
+from db import create_friend_group, get_my_content, get_my_friend_groups
+from db import get_content, get_friend_group, add_friend, get_my_tags
+from db import tag_content_item, remove_tag_on_content_item
+from db import accept_tag_on_content_item, get_friend_group_members
+from db import get_tags_from_item_id, count_ratings_on_content, add_rating
+from db import get_user, update_user, remove_user_from_group
 from utilities import login_required
 
 import os
+import json
 
 app = Flask(__name__)
 
 
 @app.route('/')
 def index():
-    _, posts = get_public_content()
-
     if 'email' not in session:
+        _, posts = get_public_content()
         return render_template('index.html', posts=posts)
 
+    _, posts = get_my_content(session['email'])
+    _, groups = get_my_friend_groups(session['email'])
+    _, tags = get_my_tags(session['email'])
     return render_template('index.html', email=session['email'],
                            fname=session['fname'], lname=session['lname'],
-                           posts=posts)
+                           posts=posts, groups=groups, tags=tags)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -73,35 +82,90 @@ def logout():
 @login_required
 def post():
     email = session['email']
+    title = request.form.get('submission-title')
     post = request.form.get('submission-text')
-    post_content(email, 'test', post, True)
+    private = request.form.get('private')
+    if private == 'True':
+        share = request.form.get('share')
+        if share != '':
+            share = share.split(',')
+            share = [x.split(':') for x in share]
+        private = True
+    elif private == 'False':
+        private = False
+    post_content(email, title, post, not private)
     return redirect('/')
+
+
+@app.route('/get_post', methods=['POST'])
+@login_required
+def get_post():
+    item_id = request.get_json().get('item_id')
+    _, post = get_content(session['email'], item_id)
+    post['post_time'] = str(post['post_time'])
+    return json.dumps(post)
 
 
 @app.route('/posts')
 def get_posts():
-    # Optional Feature 7 (Person 1)
-    # Optional Feature 8 (Person 1)
-    # Modify
-    # Return Value: Posts in a list in the correct filtered order
+    # Optional Feature 7 (Sai)
+    # Optional Feature 8 (Sai)
     # Filtering stuff
+    # Modify get_my_content in db.py
+    # Return Value: Posts in a list in the correct filtered order
     pass
 
 
 def rate():
     # Optional Feature 1 (Person 2)
+    # Modify db.py
+    # Idk add rating also would like query to get number of rates by item_id
+    # Return Value: Success or Error Message
+    # i.e. (True, 'Success') or (False, 'Post does not exist')
     pass
 
 
+@app.route('/tag', methods=['POST'])
+@login_required
 def tag():
-    # Required Feature 6
+    item_id = request.form.get('item_id')
+    email_tagged = request.form.get('tagged_email')
+    tag_content_item(email_tagged, session['email'], item_id)
     # Optional Feature 4 (tag group) (Person 2)
-    pass
+    # Modify db.py
+    # Idk add tagging groups
+    # Return Value: Success or Error Message
+    # i.e. (True, 'Success') or (False, 'Post does not exist')
+    return redirect('/')
 
 
+@app.route('/tag/get', methods=['POST'])
+@login_required
+def get_tag():
+    item_id = request.get_json().get('item_id')
+    _, content = get_tags_from_item_id(item_id)
+    # Optional Feature 4 (tag group) (Person 2)
+    # Modify db.py
+    # Idk add tagging groups
+    # Return Value: Success or Error Message
+    # i.e. (True, 'Success') or (False, 'Post does not exist')
+    return json.dumps(content)
+
+
+@app.route('/tag/review')
+@login_required
 def accept_tag():
-    # Required Feature 4
-    pass
+    item_id = request.args['item_id']
+    email_tagger = request.args['email_tagger']
+    status = request.args['status']
+
+    if status == 'delete':
+        remove_tag_on_content_item(session['email'], email_tagger, item_id)
+
+    if status == 'accept':
+        accept_tag_on_content_item(session['email'], email_tagger, item_id)
+
+    return redirect('/')
 
 
 def comment():
@@ -109,34 +173,58 @@ def comment():
     pass
 
 
+@app.route('/group/create', methods=['POST'])
+@login_required
 def create_group():
-    # Required Feature 7
-    pass
+    fg_name = request.form['fg_name']
+    desc = request.form['fg_description']
+    success, message = create_friend_group(session['email'], fg_name, desc)
+    return redirect('/')
 
 
+@app.route('/group/get', methods=['POST'])
+@login_required
+def get_group():
+    fg_name = request.get_json().get('fg_name')
+    owner_email = request.get_json().get('owner_email')
+    _, content = get_friend_group(session['email'], fg_name, owner_email)
+    return json.dumps(content)
+
+
+@app.route('/group/members', methods=['POST'])
+@login_required
+def get_group_members():
+    fg_name = request.get_json().get('fg_name')
+    owner = request.get_json().get('owner_email')
+    _, content = get_friend_group_members(session['email'], fg_name, owner)
+    return json.dumps(content)
+
+
+@app.route('/group/invite', methods=['POST'])
+@login_required
 def invite_group():
-    # Required Feature 7
-    pass
+    fg_name = request.form['fg_name']
+    owner_email = request.form['owner_email']
+    fname = request.form['fname']
+    lname = request.form['lname']
+    add_friend(fname, lname, session['email'], owner_email, fg_name)
+    return redirect('/')
 
 
 @app.route('/group/leave', methods=['POST'])
 @login_required
 def leave_group():
-    group = request.form['group']
-    remove_user_from_group(group=group, email=session['email'])
+    group = request.form['fg_name']
+    owner_email = request.form['owner_email']
+    remove_user_from_group(group=group, owner_email=owner_email, email=session['email'])
     return redirect('/')
-    # Optional Feature 3 (Person 4)
-    # Remove from Belongs Table
-    # Modify db.py
-    # Return Value: Success or Error Message
-    # i.e. (True, 'Success') or (False, 'Group Doesn't Exist')
-    pass
 
 
 @app.route('/group/best', methods=['POST'])
 @login_required
 def best_group():
-    group = request.form['group']
+    fg_name = request.form['fg_name']
+    owner_email = request.form['owner_email']
     # Optional Feature 6 (Person 5)
     # Probably new table (but you can implement however you want)
     # Add group to best friends table
@@ -171,17 +259,7 @@ def edit_profile():
         session['lname'] = user['lname']
 
     return redirect('/')
-    # Optional Feature 5 (Person 4)
-    # Update Queries for User
-    # Modify db.py
-    # Assume params are accurate
-    #   (if not changing fname, it'll be original fname)
-    # Return Value: Success or Error Message
-    # i.e. (True, 'Success') or (False, 'Email already exists')
 
-
-# Done:
-# Required Features: 1, 2, 3, 5
 
 @app.errorhandler(404)
 def page_not_found(e):

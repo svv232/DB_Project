@@ -11,6 +11,16 @@ body, input {
   box-shadow: none !important;
 }
 
+.form-control:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+textarea:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 #nav-contain {
   font-weight: bold;
   font-size: 13px;
@@ -234,7 +244,7 @@ body, input {
 
 .post-footer {
   font-size: 12px;
-  padding: 10px 0 5px 0;
+  padding: 5px 0 5px 0;
 }
 
 .post-actions {
@@ -248,11 +258,6 @@ body, input {
   padding: 0;
   background-color: transparent;
   color: #657786;
-}
-
-.post-actions button:hover {
-  background-color: transparent;
-  color: #4AB3F4;
 }
 
 .post-actions button:focus {
@@ -346,7 +351,7 @@ body, input {
 
 .users-info {
   font-size: 14px;
-  margin-left: -15px;
+  margin-left: 7px;
 }
 
 .users-verified {
@@ -359,10 +364,11 @@ body, input {
 
 .users-tag {
   color: #657786;
+  font-size: 12px;
 }
 
 .submission {
-  height: 135px;
+  height: 175px;
   background-color: #E8F5FD;
   padding-bottom: 10px;
   border: 1px solid #e6ecf0
@@ -393,6 +399,20 @@ body, input {
   box-shadow: 0 0 0 1px #A4D9F9;
   padding: 10px;
   font-size: 13px;
+}
+
+.submission-title {
+  border-radius: 8px;
+  border: 1px solid #A4D9F9;
+  box-shadow: 0 0 0 1px #A4D9F9;
+  margin-bottom: 10px;
+  padding: 2px 10px;
+  width: 100%;
+  font-size: 13px;
+}
+
+.submission-title:focus {
+  outline: none;
 }
 
 .submission-text:focus {
@@ -478,6 +498,11 @@ body, input {
   padding: 4px 10px;
 }
 
+.submission-on {
+  background-color: #1DA1F2;
+  color: white;
+}
+
 .submission-link:hover {
   border: 1px solid rgba(29,161,242,0.4);
 }
@@ -492,7 +517,7 @@ body, input {
 }
 
 .no-friends {
-  font-size: 14px;
+  font-size: 13px;
   color: #657786;
   padding: 10px 15px 15px 15px;
 }
@@ -519,4 +544,208 @@ body, input {
 
 #postModal .post-user {
   font-size: 15px;
+}
+
+.friend-container h1 {
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+.friend-container h2 {
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+.friend-container p {
+  font-size: 14px;
+  margin: 15px 0;
+}
+
+.friend-container ul {
+  font-size: 14px;
+  list-style-type: none;
+  padding-left: 10px;
+}
+
+.friend-container .friend-owner {
+  font-size: 12px;
+  color: #657786;
+}
+
+.friend-container .friend-header {
+  margin-bottom: 0px;
+}
+
+.friend-container input {
+  height: calc(2rem);
+}
+
+.friend-container .form-group {
+  margin-bottom: 8px;
+}
+
+.friend-container textarea:focus {
+  border-color: #80bdff;
+}
+
+.friend-container textarea {
+  font-size: 1rem;
+  resize: none;
+  height: 70px;
+  width: 100%;
+  border-radius: .25rem;
+  border: 1px solid #ced4da;
+  padding: 10px;
+  margin-bottom: 7px;
+}
+
+.close {
+  margin-top: -5px;
+}
+
+.post-filler {
+  text-align: center;
+  min-height: 100px;
+  color: #657786;
+  line-height: 100px;
+}
+
+.users-card:hover {
+  cursor: pointer;
+  background-color: #f5f8fa;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.post-tagged {
+  font-size: 12px;
+  margin-left: 5px;
+  margin-top: 10px;
+}
+
+.space {
+  display: inline-block;
+  width: 5px;
+}
+
+.post-tagged span:hover {
+  color: #1DA1F2;
+  cursor: pointer;
+}
+
+.comment-text {
+  resize: none;
+  overflow: hidden;
+  height: 35px;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #A4D9F9;
+  box-shadow: 0 0 0 1px #A4D9F9;
+  padding: 5px 10px;
+  line-height: 23px;
+  font-size: 13px;
+}
+
+
+.post-comment {
+  background-color: #E8F5FD;
+  padding: 20px 30px 10px 30px;
+}
+
+
+.comment-button {
+  float: right;
+}
+
+.post-comments {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+  margin: 0;
+}
+
+.post-comments li {
+  border-top: 1px solid #ced4da;
+  padding: 10px 30px;
+}
+
+.post-comments .post-user {
+  font-size: 12px;
+}
+
+.post-comments .post-tag {
+  font-size: 10px;
+}
+
+.post-comments p {
+  font-size: 12px;
+  margin-bottom: 0px;
+  margin-left: 5px;
+}
+
+#tag-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#postModal .post-actions button:hover {
+  background-color: transparent;
+  color: #4AB3F4;
+}
+
+.tag-menu {
+  padding: 0;
+  border: 0;
+  width: 250px;
+}
+
+.tag-menu .form-group {
+  margin: 0;
+  display: flex;
+}
+
+.tag-menu input {
+  display: inline-block;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  font-size: 14px;
+}
+
+.tag-menu button {
+  background-color: #4AB3F4;
+  color: white;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  width: 80px;
+  font-size: 14px;
+}
+
+.tag-menu button:hover {
+  background-color: #1DA1F2 !important;
+  color: white !important;
+}
+
+.tag-modal {
+  margin-top: 100px;
+}
+
+#privacyMenu {
+  margin-top: 35px;
+  margin-left: -10px;
+}
+
+.privacy-on {
+  background-color: #f8f9fa !important;
+  color: #4AB3F4 !important;
+}
+
+.privacyGroup {
+  background-color: white;
+}
+
+.privacyGroup:active {
+  color: black !important;
 }
