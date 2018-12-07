@@ -62,7 +62,7 @@ def post_content(email_post, item_name, file_path, is_pub):
     cursor.execute(query, (email_post, file_path, item_name, is_pub))
     conn.commit()
     cursor.close()
-    return True, 'Item Successfully Posted'
+    return True, cursor.lastrowid, 'Item Successfully Posted'
 
 
 def get_my_content(email):
