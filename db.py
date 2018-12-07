@@ -4,7 +4,7 @@ from hashlib import sha256
 conn = pymysql.connect(host='localhost',
                        port=3306,
                        user='PriCoSha',
-                       password='YES',
+                       password='PriCoSha',
                        db='PriCoSha',
                        charset='utf8mb4',
                        cursorclass=pymysql.cursors.DictCursor)
@@ -218,7 +218,7 @@ def tag_content_item(email_tagged, email_tagger, item_id):
     return True, 'Successfully tagged ContentItem'
 
 
-def add_friend(fname, lname, email, owner_email, fg_name): 
+def add_friend(fname, lname, email, owner_email, fg_name):
     cursor = conn.cursor()
     query = ('SELECT fg_name FROM Friendgroup WHERE owner_email=%s')
     cursor.execute(query, (owner_email,))
@@ -297,8 +297,7 @@ def filter_by_group(email, fg_name):
 
 def share_with_group(email, fg_name, item_id):
     cursor = conn.cursor()
-    insert = ('INSERT INTO Share VALUES ((SELECT owner_email from Belong '
-              'WHERE email=%s), %s, %s)')
+    insert = ('INSERT INTO Share VALUES (%s, %s, %s)')
     cursor.execute(insert, (email, fg_name, item_id))
     conn.commit()
     cursor.close()

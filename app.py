@@ -87,10 +87,7 @@ def post():
     private = request.form.get('private')
     if private == 'True':
         share = request.form.get('share')
-<<<<<<< HEAD
-=======
         print("Share initially is :", share)
->>>>>>> 4f0126f... huh
         if share and share != '':
             share = share.split(',')
             share = [x.split(':') for x in share]
@@ -100,7 +97,7 @@ def post():
         private = False
     success, id, msg = post_content(email, title, post, not private)
     print("Share is:", share)
-    share_with_group(email, share, id)
+    share_with_group(share[0][1], share[0][0], id)
     return redirect('/')
 
 
