@@ -202,19 +202,44 @@ def accept_tag():
 
 @app.route('/comment/get', methods=['POST'])
 @login_required
-def comments():
+def get_comment():
+    # Login required decorator ensures only logged in users can get comments
+    # Async request from JavaScript to fetch this info
+    # Request sends item_id of post to fetch comments for as json
     item_id = request.get_json().get('item_id')
+
+    # First return value is status code which we don't need outside of debug
+    # situations. Mostly following convention here.
     _, content = get_comments(item_id, session['email'])
+
+    # Content is the results of the query
+    # If no comments then empty JSON array is sent
+    for comment in content:
+        # Datetime cannot be json serialized
+        # First convert all datetimes to strings
+        comment['comment_time'] = str(comment['comment_time'])
+
+    # Return back comments as JSON
     return json.dumps(content)
 
 
 @app.route('/comment', methods=['POST'])
 @login_required
 def comment():
+    # Post a comment
+    # Form on page sends over the appropriate fields
     item_id = request.form['item_id']
     comment = request.form['comment']
-    print('item', item_id)
+
+    # Don't really care for success values of commenting
+    # If user tries to cheat and send random item_id, the add_comment function
+    # will handle it
+    # Nothing will happen if item_id is not visible to commenter, which is fine
+    # because if users follows the rules it should work fine
+    # Users not following the rules will not break the database
     add_comment(item_id, comment, session['email'])
+
+    # Just redirect to index page
     return redirect('/')
 
 

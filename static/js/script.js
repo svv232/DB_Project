@@ -52,7 +52,7 @@ Array.from(posts).forEach(function(element) {
         .then(content => {
           document.getElementById('postComments').innerHTML = ''
           for (comment in content) {
-            document.getElementById('postComments').innerHTML += "<li><div class='post-info'><span class='post-user'>" + content[comment]['commenter_email'] + "</span></div><p>" + content[comment]['comment'] + "</p></li>"
+            document.getElementById('postComments').innerHTML += "<li><div class='post-info'><span class='post-user'>" + content[comment]['commenter_email'] + "</span></div><p>" + content[comment]['comment'] + "</p><span class='post-time'>" + content[comment]['comment_time'] + "</span></li>"
           }
           fetch('http://localhost:5000/rate/get', {
             method: 'POST',
