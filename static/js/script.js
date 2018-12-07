@@ -29,7 +29,7 @@ Array.from(posts).forEach(function(element) {
   });
 });
 
-let groups = document.getElementsByClassName('users-card');
+let groups = document.getElementsByClassName('users-info');
 
 Array.from(groups).forEach(function(element) {
   element.addEventListener('click', function(e) {
@@ -67,10 +67,12 @@ Array.from(groups).forEach(function(element) {
       if (content.length > 0) {
         document.getElementById('groupFriendMembers').innerHTML = ''
         for (member in content) {
-          document.getElementById('groupFriendMembers').innerHTML += '<li>' + content['email'] + '</li>'
+          document.getElementById('groupFriendMembers').innerHTML += '<li>' + content[member]['email'] + '</li>'
         }
-      }
+      } else {
+
       document.getElementById('groupFriendMembers').innerHTML = '<li>No members 😥</li>';
+      }
     });
   });
 });

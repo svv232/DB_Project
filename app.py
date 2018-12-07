@@ -5,7 +5,7 @@ from db import get_content, get_friend_group, add_friend, get_my_tags
 from db import tag_content_item, remove_tag_on_content_item
 from db import accept_tag_on_content_item, get_friend_group_members
 from db import get_tags_from_item_id, count_ratings_on_content, add_rating
-from db import get_user, update_user, remove_user_from_group
+from db import get_user, update_user, remove_user_from_group, share_with_group
 from utilities import login_required
 
 import os
@@ -87,13 +87,17 @@ def post():
     private = request.form.get('private')
     if private == 'True':
         share = request.form.get('share')
+        print("Share initially is :", share)
         if share and share != '':
             share = share.split(',')
             share = [x.split(':') for x in share]
+            print("Share is now: ", share)
         private = True
     elif private == 'False':
         private = False
-    post_content(email, title, post, not private)
+    success, id, msg = post_content(email, title, post, not private)
+    print("Share is:", share)
+    share_with_group(share[0][1], share[0][0], id)
     return redirect('/')
 
 
@@ -198,7 +202,8 @@ def get_group():
 def get_group_members():
     fg_name = request.get_json().get('fg_name')
     owner = request.get_json().get('owner_email')
-    _, content = get_friend_group_members(session['email'], fg_name, owner)
+    _, content = get_friend_group_members(session['email'], owner, fg_name)
+    print(content)
     return json.dumps(content)
 
 
