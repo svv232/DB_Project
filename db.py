@@ -341,7 +341,7 @@ def get_user(email):
 
 
 def update_user(email, new_email=None, new_first=None, new_last=None):
-    if not new_email or not new_first or not new_last:
+    if not new_email and not new_first and not new_last:
         return False, "No parameters to update"
     cursor = conn.cursor()
     if new_email:
