@@ -296,13 +296,13 @@ def get_my_tags(email):
     return True, content
 
 
-def filter_by_date(email, timestamp):
+def filter_by_date(email):
     cursor = conn.cursor()
     query = ('SELECT * FROM ContentItem WHERE item_id IN '
              '(SELECT item_id FROM Share INNER JOIN Belong ON '
              'Belong.fg_name=Share.fg_name AND '
              'Belong.owner_email=Share.owner_email AND Belong.email=%s) '
-             'OR is_pub AND post_time=%s')
+             'OR is_pub ORDER BY post_time DESC')
     cursor.execute(query, (email, timestamp))
     content = cursor.fetchall()
     cursor.close()

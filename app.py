@@ -113,15 +113,22 @@ def get_post():
     return json.dumps(post)
 
 
+from random import choice
 @app.route('/posts')
 def get_posts():
+    filter_type=requests.args["filter_type"]
+    if filter_type == "date":
+        _,c = filter_by_date(session['email'])
+    else if filter_type == "friendgroup":
+        group = choice(get_my_friend_groups(session["email"]))
+        _,c = filter_by_date(session["email"], group)
+
     # Optional Feature 7 (Sai)
     # Optional Feature 8 (Sai)
     # Filtering stuff
     # Modify get_my_content in db.py
     # Return Value: Posts in a list in the correct filtered order
-    pass
-
+    return json.dumps(c)
 
 @app.route('/rate')
 @login_required
