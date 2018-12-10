@@ -265,3 +265,18 @@ document.getElementById('submit-form').addEventListener('submit', function(e) {
   this.appendChild(input);
   this.submit();
 });
+
+let filters = document.getElementsByClassName('filter-link');
+Array.from(filters).forEach(function(element) {
+  element.addEventListener('click', function(e) {
+    e.preventDefault();
+    var href = e.target.getAttribute('href');
+    fetch('/posts', {
+      method: 'POST',
+      body: JSON.stringify({item_id: this.getAttribute('post-id')}),
+      headers:{
+        'Content-Type': 'application/json'
+      }
+    });
+  });
+});

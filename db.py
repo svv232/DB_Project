@@ -214,15 +214,20 @@ def tag_group_members(owner_email, fg_name, email_tagger, item_id):
 
 
 def check_tagged_group_post_visibility(owner_email, fg_name, item_id):
-    query = ('SELECT email, status FROM Belong WHERE fg_name=%s AND owner_email=%s')
+    query = ('SELECT email FROM Belong WHERE fg_name=%s AND owner_email=%s')
     cursor = conn.cursor()
     cursor.execute(query, (fg_name, owner_email))
     members = cursor.fetchall()
     group_visibility = True
+    counter = 0
     for member in members:
         group_visibility = group_visibility and member[0][1]
+        counter += 1
     cursor.close()
-    return group_visibility
+    if not counter:
+        return False
+    else:
+        return group_visibility
 
 
 def tag_content_item(email_tagged, email_tagger, item_id):
@@ -302,8 +307,8 @@ def filter_by_date(email):
              '(SELECT item_id FROM Share INNER JOIN Belong ON '
              'Belong.fg_name=Share.fg_name AND '
              'Belong.owner_email=Share.owner_email AND Belong.email=%s) '
-             'OR is_pub ORDER BY post_time DESC')
-    cursor.execute(query, (email, timestamp))
+             'OR is_pub ORDER BY post_time ASC')
+    cursor.execute(query, (email))
     content = cursor.fetchall()
     cursor.close()
     return True, content
@@ -315,7 +320,7 @@ def filter_by_group(email, fg_name):
              '(SELECT item_id FROM Share INNER JOIN Belong ON '
              'Belong.fg_name=Share.fg_name AND '
              'Belong.owner_email=Share.owner_email AND Belong.email=%s '
-             'AND fg_name=%s)')
+             'AND Belong.fg_name=%s)')
     cursor.execute(query, (email, fg_name))
     content = cursor.fetchall()
     cursor.close()
@@ -466,7 +471,7 @@ def check_for_best_friends(owner_email):
     result = cursor.fetchone()
     cursor.close()
     exists = result is not None
-    message = "Best friends group does not exist" 
+    message = "Best friends group does not exist"
     if exists:
         message = "Success"
     return exists, message
