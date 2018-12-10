@@ -114,21 +114,30 @@ def get_post():
 
 
 from random import choice
+from db import filter_by_date, filter_by_group
 @app.route('/posts')
+@login_required
 def get_posts():
-    filter_type=requests.args["filter_type"]
+    filter_type=request.args["filter_type"]
     if filter_type == "date":
         _,c = filter_by_date(session['email'])
     elif filter_type == "friendgroup":
-        group = choice(get_my_friend_groups(session["email"]))
-        _,c = filter_by_date(session["email"], group)
-
+        group = choice(get_my_friend_groups(session["email"])[1])
+        print(group, "wow")
+        _,c = filter_by_group(session["email"], group['fg_name'])
     # Optional Feature 7 (Sai)
     # Optional Feature 8 (Sai)
     # Filtering stuff
     # Modify get_my_content in db.py
     # Return Value: Posts in a list in the correct filtered order
-    return json.dumps(c)
+    posts = c
+    _, tags = get_my_tags(session['email'])
+    _, best_friends = get_best_friends(session['email'])
+    _, groups = get_my_friend_groups(session['email'])
+    bff_list = [ a['email'] for a in best_friends]
+    return render_template('index.html', email=session['email'],
+                           fname=session['fname'], lname=session['lname'],
+                           posts=posts, groups=groups, tags=tags, best_friends = bff_list)
 
 @app.route('/rate')
 @login_required
@@ -173,6 +182,9 @@ def tag():
     # i.e. (True, 'Success') or (False, 'Post does not exist')
     return redirect('/')
 
+
+@app.route('/tag/group', methods=['POST'])
+@login_required
 def tag_group():
     item_id = request.form.get('item_id')
     group_tagged = request.form.get('tagged_group')

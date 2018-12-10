@@ -82,6 +82,16 @@
         </div>
         {% endif %}
         <ul id="post-container">
+
+          <div class="dropdown">
+            <button id="ugh" type="button" class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span data-toggle="popover" data-placement="top" data-content="Filter" data-container="body"><i class="fas fa-filter" style="color:#1da1f2"></i></span></button>
+            <div id="filterPosts" class="dropdown-menu" aria-labelledby="filterButton">
+                <h6 class="dropdown-header">Filter By</h6>
+                <a class="dropdown-item filter-link" href="/posts?filter_type=date">Filter by date</a>
+                <a class="dropdown-item filter-link" href="/posts?filter_type=friendgroup">Filter by group</a>
+            </div>
+          </div>
+
           {% if not posts %}
             <div class="post-filler">
               No public posts 😥
