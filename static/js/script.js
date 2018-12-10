@@ -271,40 +271,61 @@ Array.from(bff_stars).forEach(function(element){
     element.addEventListener('click', function(e) {
         e.stopPropagation();
         var style = element.getAttribute("style");
-        
+
         form = document.createElement("form")
         form.setAttribute("type", "hidden")
-        form.setAttribute("method", "post") 
-        
+        form.setAttribute("method", "post")
+
         field = document.createElement("input")
         field.setAttribute("type", "hidden")
         field.setAttribute("name","email")
         field.setAttribute("value", element.getAttribute("name"))
-        form.appendChild(field); 
-        
+        form.appendChild(field);
+
         if (style === null){
             form.setAttribute("action", "/group/best/invite");
         }
         else{
             form.setAttribute("action", "/group/best/remove");
         }
-        
+
         document.body.appendChild(form);
         form.submit();
     });
 });
 
-let filters = document.getElementsByClassName('filter-link');
+let filters = document.getElementsByClassName('filter-link')
 Array.from(filters).forEach(function(element) {
   element.addEventListener('click', function(e) {
     e.preventDefault();
     var href = e.target.getAttribute('href');
-    fetch('/posts', {
+    form = document.createElement("form")
+    form.setAttribute("type", "hidden")
+    field = document.createElement("input")
+    field.setAttribute("type", "hidden")
+    field.setAttribute("name","filter_type")
+    field.setAttribute("value", href)
+    form.appendChild(field)
+    form.setAttribute("action", "/posts")
+    document.body.appendChild(form);
+    form.submit()
+  });
+});
+
+let grpTag = document.getElementsByClassName('groupTag')
+Array.from(grpTag).forEach(function(element) {
+  element.addEventListener('click', function(e) {
+    e.preventDefault();
+    var item_id = document.getElementById('tagId').value;
+    fetch('http://localhost:5000/tag/group', {
       method: 'POST',
-      body: JSON.stringify({item_id: this.getAttribute('post-id')}),
-      headers:{
+      body: JSON.stringify({email: this.getElementsByClassName('group-owner-email')[0].innerHTML,
+                            fg_name: this.getElementsByClassName('group-tag')[0].innerHTML,
+                            item_id: item_id}),
+      headers: {
         'Content-Type': 'application/json'
       }
     });
-  });
-});
+    window.location = 'http://localhost:5000'
+  })
+})

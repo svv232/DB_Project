@@ -190,7 +190,7 @@ def accept_tag_on_content_item(email_tagged, email_tagger, item_id):
 
 def remove_tag_on_content_item(email_tagged, email_tagger, item_id):
     cursor = conn.cursor()
-    query = ('DELETE FROM tag WHERE email_tagged=%s '
+    query = ('DELETE FROM Tag WHERE email_tagged=%s '
              'AND email_tagger=%s AND item_id=%s')
     cursor.execute(query, (email_tagged, email_tagger, item_id))
     conn.commit()
@@ -199,18 +199,23 @@ def remove_tag_on_content_item(email_tagged, email_tagger, item_id):
 
 
 def tag_group_members(owner_email, fg_name, email_tagger, item_id):
-  query = ('SELECT email FROM Belong WHERE fg_name=%s AND owner_email=%s')
-  cursor = conn.cursor()
-  cursor.execute(query, (fg_name, owner_email))
-  members = cursor.fetchall()
-  print(members)
-  for member in members:
+    cursor = conn.cursor()
+    if email_tagger == owner_email:
+        query = ('SELECT email FROM Belong WHERE fg_name=%s AND owner_email=%s')
+        cursor.execute(query, (fg_name, owner_email))
+    else:
+        query = ('SELECT email FROM Belong WHERE fg_name=%s AND owner_email=%s AND email!=%s '
+                 'UNION SELECT owner_email FROM Belong WHERE fg_name=%s AND owner_email=%s')
+        cursor.execute(query, (fg_name, owner_email, email_tagger, fg_name, owner_email))
+    members = cursor.fetchall()
+    for member in members:
       insert = ('INSERT INTO Tag '
                 '(email_tagged, email_tagger, item_id, status, tagtime) '
                 'VALUES(%s, %s, %s, FALSE, NOW())')
-      cursor.execute(insert, (member, email_tagger, item_id))
-  cursor.close()
-  return True, "Success"
+      cursor.execute(insert, (member['email'], email_tagger, item_id))
+    conn.commit()
+    cursor.close()
+    return True, "Success"
 
 
 def check_tagged_group_post_visibility(owner_email, fg_name, item_id):
@@ -411,7 +416,6 @@ def add_rating(rater_email, item_id, emoji):
     check = ('SELECT emoji FROM Rate WHERE item_id =%s and email=%s')
     cursor.execute(check, (item_id, rater_email))
     content = cursor.fetchall()
-    print(content)
     if not len(content):
         query = ('INSERT INTO Rate '
                  '(email, item_id, rate_time, emoji) '

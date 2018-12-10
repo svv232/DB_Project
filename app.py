@@ -7,7 +7,7 @@ from db import accept_tag_on_content_item, get_friend_group_members
 from db import get_tags_from_item_id, ratings_on_content, add_rating
 from db import get_user, update_user, remove_user_from_group, share_with_group
 from db import get_best_friends, get_my_best_friend_group
-from db import add_comment, get_comments
+from db import add_comment, get_comments, tag_group_members
 from utilities import login_required
 
 import os
@@ -123,7 +123,6 @@ def get_posts():
         _,c = filter_by_date(session['email'])
     elif filter_type == "friendgroup":
         group = choice(get_my_friend_groups(session["email"])[1])
-        print(group, "wow")
         _,c = filter_by_group(session["email"], group['fg_name'])
     # Optional Feature 7 (Sai)
     # Optional Feature 8 (Sai)
@@ -183,14 +182,24 @@ def tag():
     return redirect('/')
 
 
-@app.route('/tag/group', methods=['POST'])
+@app.route('/tag/group', methods=['GET', 'POST'])
 @login_required
 def tag_group():
-    item_id = request.form.get('item_id')
-    group_tagged = request.form.get('tagged_group')
-    owner_email = request.form.get('owner_email')
+    item_id = request.get_json().get('item_id')
+    group_tagged = request.get_json().get('fg_name')
+    owner_email = request.get_json().get('email')
     tag_group_members(owner_email, group_tagged, session['email'], item_id)
     return redirect('/')
+
+
+@app.route('/tag/group/get', methods=['POST'])
+@login_required
+def get_group_tag():
+    item_id = request.get_json().get('item_id')
+    err, content = get_tags_from_item_id(session['email'], item_id)
+    for tag in content:
+        tag['tagtime'] = str(tag['tagtime'])
+    return json.dumps(content)
 
 @app.route('/tag/get', methods=['POST'])
 @login_required
@@ -319,14 +328,14 @@ def leave_group():
 def add_best_friend():
     owner_email = session['email']
     friend_email = request.form['email']
-   
+
     friend = get_user(friend_email)
     fname = friend['fname']
     lname = friend['lname']
-    
+
     _, bff_group = get_my_best_friend_group(owner_email)
     bff_group = bff_group[0]
-    add_friend(fname, lname, bff_group['owner_email'], owner_email, bff_group['fg_name']) 
+    add_friend(fname, lname, bff_group['owner_email'], owner_email, bff_group['fg_name'])
     return redirect('/')
 
 @app.route('/group/best/remove', methods=['POST'])
@@ -334,7 +343,7 @@ def add_best_friend():
 def remove_best_friend():
     owner_email = session['email']
     friend_email = request.form['email']
-    
+
     _, bff_group = get_my_best_friend_group(owner_email)
     bff_group = bff_group[0]
 

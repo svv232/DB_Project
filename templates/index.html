@@ -87,8 +87,8 @@
             <button id="ugh" type="button" class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span data-toggle="popover" data-placement="top" data-content="Filter" data-container="body"><i class="fas fa-filter" style="color:#1da1f2"></i></span></button>
             <div id="filterPosts" class="dropdown-menu" aria-labelledby="filterButton">
                 <h6 class="dropdown-header">Filter By</h6>
-                <a class="dropdown-item filter-link" href="/posts?filter_type=date">Filter by date</a>
-                <a class="dropdown-item filter-link" href="/posts?filter_type=friendgroup">Filter by group</a>
+                <a class="dropdown-item filter-link" href="date">Filter by date</a>
+                <a class="dropdown-item filter-link" href="friendgroup">Filter by group</a>
             </div>
           </div>
 
@@ -253,6 +253,17 @@
                         </div>
                       </form>
                     </div>
+
+                    <div class="dropdown">
+                      <button id="tagGroupButton" type="button" class="btn tagGroupButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span data-toggle="popover" data-placement="top" data-content="TagGrp" data-container="body"><i class="far fa-hand-peace" style="color:#1da1f2"></i></span></button>
+                      <div id="tagGroup" class="dropdown-menu grpTag" aria-labelledby="" action="tag/group" method="POST">
+                        <h6 class="dropdown-header">Tag Group</h6>
+                        {% for group in groups %}
+                          <button class="dropdown-item groupTag" href="#"><span class="group-tag">{{ group.fg_name }}</span><span> • </span><span class="group-owner-email">{{ group.owner_email }}</span></button>
+                        {% endfor %}
+                      </div>
+                    </div>
+
                     <div class="dropdown">
                       <button id="rateButton" type="button" class="btn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span data-toggle="popover" data-placement="top" data-content="Rate" data-container="body"><i class="far fa-grin"></i></span></button>
                       <div class="dropdown-menu emoji-container" aria-labelledby="rateButton">
