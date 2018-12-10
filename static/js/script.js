@@ -265,3 +265,32 @@ document.getElementById('submit-form').addEventListener('submit', function(e) {
   this.appendChild(input);
   this.submit();
 });
+
+let bff_stars = document.getElementsByClassName('bff_star')
+Array.from(bff_stars).forEach(function(element){
+    element.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var style = element.getAttribute("style");
+        
+        form = document.createElement("form")
+        form.setAttribute("type", "hidden")
+        form.setAttribute("method", "post") 
+        
+        field = document.createElement("input")
+        field.setAttribute("type", "hidden")
+        field.setAttribute("name","email")
+        field.setAttribute("value", element.getAttribute("name"))
+        form.appendChild(field); 
+        
+        if (style === null){
+            form.setAttribute("action", "/group/best/invite");
+        }
+        else{
+            form.setAttribute("action", "/group/best/remove");
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
+    });
+});
+

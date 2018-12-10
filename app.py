@@ -6,7 +6,7 @@ from db import tag_content_item, remove_tag_on_content_item
 from db import accept_tag_on_content_item, get_friend_group_members
 from db import get_tags_from_item_id, ratings_on_content, add_rating
 from db import get_user, update_user, remove_user_from_group, share_with_group
-from db import get_best_friends
+from db import get_best_friends, get_my_best_friend_group
 from db import add_comment, get_comments
 from utilities import login_required
 
@@ -119,7 +119,7 @@ def get_posts():
     filter_type=requests.args["filter_type"]
     if filter_type == "date":
         _,c = filter_by_date(session['email'])
-    else if filter_type == "friendgroup":
+    elif filter_type == "friendgroup":
         group = choice(get_my_friend_groups(session["email"]))
         _,c = filter_by_date(session["email"], group)
 
@@ -302,19 +302,32 @@ def leave_group():
     return redirect('/')
 
 
-@app.route('/group/best', methods=['POST'])
+@app.route('/group/best/invite', methods=['POST'])
 @login_required
-def best_group():
-    fg_name = request.form['fg_name']
-    owner_email = request.form['owner_email']
-    # Optional Feature 6 (Person 5)
-    # Probably new table (but you can implement however you want)
-    # Add group to best friends table
-    # Modify db.py
-    # Return Value: Success or Error Message
-    # i.e. (True, 'Success') or (False, 'Group Doesn't Exist')
-    pass
+def add_best_friend():
+    owner_email = session['email']
+    friend_email = request.form['email']
+   
+    friend = get_user(friend_email)
+    fname = friend['fname']
+    lname = friend['lname']
+    
+    _, bff_group = get_my_best_friend_group(owner_email)
+    bff_group = bff_group[0]
+    add_friend(fname, lname, bff_group['owner_email'], owner_email, bff_group['fg_name']) 
+    return redirect('/')
 
+@app.route('/group/best/remove', methods=['POST'])
+@login_required
+def remove_best_friend():
+    owner_email = session['email']
+    friend_email = request.form['email']
+    
+    _, bff_group = get_my_best_friend_group(owner_email)
+    bff_group = bff_group[0]
+
+    remove_user_from_group(bff_group['fg_name'], bff_group['owner_email'], friend_email)
+    return redirect('/')
 
 @app.route('/profile', methods=['POST'])
 @login_required
